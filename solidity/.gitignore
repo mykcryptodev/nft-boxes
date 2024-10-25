@@ -53,6 +53,7 @@ yarn-error.log*
 cache
 cache_hardhat
 artifacts
+abis
 .deps
 
 # TypeScript bindings output directory
