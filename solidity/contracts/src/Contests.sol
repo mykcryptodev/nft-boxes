@@ -78,6 +78,7 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
     error ZeroAddress();
     error InsufficientPayment();
     error BoxAlreadyClaimed();
+    error BoxNotInContest();
     error BoxDoesNotExist();
     error RandomValuesAlreadyFetched();
     error CooldownNotMet();
@@ -172,9 +173,10 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
     }
 
     /**
-        Claim boxes
+        Claim multiple boxes in the same contest
      */
-    function claimBoxes(uint256 contestId, uint256[] memory tokenIds, address player) external payable {
+    function claimBoxes(uint256[] memory tokenIds, address player) external payable {
+        uint256 contestId = getTokenIdContestNumber(tokenIds[0]);
         // fetch the contest
         IContestTypes.Contest memory contest = contests[contestId];
         // check to make sure that the contest still allows for boxes to be claimed
@@ -191,9 +193,9 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         }
         // claim the boxes
         for (uint8 i = 0; i < numBoxesToClaim;) {
-            if (i >= nextTokenId) revert BoxDoesNotExist();
-            // boxes that are claimed must exist within the 10x10 grid
             uint256 tokenId = tokenIds[i];
+            if (getTokenIdContestNumber(tokenId) != contestId) revert BoxNotInContest();
+            if (i >= nextTokenId) revert BoxDoesNotExist();
             // check to make sure the box they are trying to claim isnt already claimed
             // check that the owner of this tokenId is this contract address
             if (boxes.ownerOf(tokenId) != address(this)) revert BoxAlreadyClaimed();

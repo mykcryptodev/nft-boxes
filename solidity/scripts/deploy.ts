@@ -90,10 +90,10 @@ async function main() {
   await delay(30000); // Wait for 30 seconds before verifying the contracts
 
   for (const contract of contractsToVerify) {
-    console.log(`Verifying ${contract.name} at address: ${GREEN}${contract.address}${RESET}`);
-    const { address, constructorArguments } = contract;
+    const { name, address, constructorArguments } = contract;
+    console.log(`Verifying ${name} at address: ${GREEN}${address}${RESET}`);
     // if this is the last contract to verify, wait 20 seconds before verifying
-    if (contract.address === contractsToVerify[contractsToVerify.length - 1].address) {
+    if (address === contractsToVerify[contractsToVerify.length - 1].address) {
       console.log("Waiting 20 seconds before verifying the last contract...\n");
       await delay(20000);
       console.log("Verifying the last contract...\n");
