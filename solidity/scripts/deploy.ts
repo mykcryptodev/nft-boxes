@@ -36,10 +36,6 @@ async function main() {
   });
   console.log("Boxes deployed to: " + `${GREEN}${boxesAddress}${RESET}\n`);
 
-  console.log({
-    functionsRouter: FUNCTIONS_ROUTER[chainId.toString() as keyof typeof FUNCTIONS_ROUTER],
-    deployer: await deployer.getAddress(),
-  });
   const gameScoreOracleArgs = [
     FUNCTIONS_ROUTER[chainId.toString() as keyof typeof FUNCTIONS_ROUTER]
   ];
@@ -53,10 +49,21 @@ async function main() {
   });
   console.log("gameScoreOracle deployed to: " + `${GREEN}${gameScoreOracleAddress}${RESET}\n`);
 
+  const contestsReader = await hre.ethers.deployContract("ContestsReader");
+  await contestsReader.waitForDeployment();
+  const contestsReaderAddress = await contestsReader.getAddress();
+  console.log("ContestsReader deployed to: " + `${GREEN}${contestsReaderAddress}${RESET}\n`);
+  contractsToVerify.push({
+    name: "ContestsReader",
+    address: contestsReaderAddress,
+    constructorArguments: [],
+  });
+
   const contestsArgs = [
     await deployer.getAddress(),
     boxesAddress,
     gameScoreOracleAddress,
+    contestsReaderAddress,
     VRF_WRAPPER[chainId.toString() as keyof typeof VRF_WRAPPER],
   ];
   const contests = await hre.ethers.deployContract("Contests", contestsArgs);
@@ -68,11 +75,14 @@ async function main() {
     address: contestsAddress,
     constructorArguments: contestsArgs,
   });
+  console.log("Contests deployed to: " + `${GREEN}${contestsAddress}${RESET}\n`);
 
   // set the contests in the boxes contract
   await boxes.setContests(contestsAddress);
-
-  console.log("Contests deployed to: " + `${GREEN}${contestsAddress}${RESET}\n`);
+  console.log("Contests set in the Boxes contract\n");
+  // set the contests in the contestsReader contract
+  await contestsReader.setContestStorage(contestsAddress);
+  console.log("Contests set in the ContestsReader contract\n");
 
   console.log(
     "Waiting 30 seconds before beginning the contract verification to allow the block explorer to index the contract...\n",
@@ -82,6 +92,12 @@ async function main() {
   for (const contract of contractsToVerify) {
     console.log(`Verifying ${contract.name} at address: ${GREEN}${contract.address}${RESET}`);
     const { address, constructorArguments } = contract;
+    // if this is the last contract to verify, wait 20 seconds before verifying
+    if (contract.address === contractsToVerify[contractsToVerify.length - 1].address) {
+      console.log("Waiting 20 seconds before verifying the last contract...\n");
+      await delay(20000);
+      console.log("Verifying the last contract...\n");
+    }
     await hre.run("verify:verify", {
       address, 
       constructorArguments

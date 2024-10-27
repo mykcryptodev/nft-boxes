@@ -43,7 +43,7 @@ contract ContestsTest is Test {
         );
 
         // Set the Contests contract address in Boxes
-        boxes.setContests(address(contests));
+        boxes.setContests(contests);
 
         // Create and fund a subscription
         uint64 subId = dummyVRF.createSubscription();

@@ -9,58 +9,19 @@ import {VRFV2PlusWrapperConsumerBase} from "@chainlink/contracts/src/v0.8/vrf/de
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 import {GameScoreOracle} from "./GameScoreOracle.sol";
 import {Boxes} from "./Boxes.sol";
+import {ContestsReader} from "./ContestsReader.sol";
+import {IContestTypes} from "./IContestTypes.sol";
 
 contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiver {
     using SafeERC20 for IERC20;
 
-    uint256 private _nextTokenId;
-
-    struct Cost {
-        address currency; // use zero address for ether
-        uint256 amount;
-    }
-
-    struct RewardPayment {
-        bool q1Paid; // track if user claimed their q1 reward
-        bool q2Paid; // track if user claimed their q2 reward
-        bool q3Paid; // track if user claimed their q3 reward
-        bool finalPaid; // track if user claimed their final reward
-    }
-
-    struct Contest {
-        uint256 id; // a unique id for this contest based on the contestId counter
-        uint256 gameId; // the id that maps to the real-world contest
-        address creator; // the user who created the contest
-        uint8[] rows; // the row scores
-        uint8[] cols; // the col scores
-        Cost boxCost; // the amount of ETH or tokens needed to claim a box
-        bool boxesCanBeClaimed; // whether or not boxes can be claimed by users (this is false once boxes have values)
-        RewardPayment rewardsPaid; // track if rewards have been claimed
-        uint256 totalRewards; // track the total amount of buy-ins collected for the contest
-        uint256 boxesClaimed; // amount of boxes claimed by users in this contest
-        uint256[] randomValues; // random numbers used to assign values to rows and cols
-        bool randomValuesSet; // used to know whether or not chainlink has provided this contest with random values
-    }
-
-    struct GameScore {
-        uint256 id; // a unique id for this game determined by the outside world data set
-        uint8 homeQ1LastDigit; // last digit of the home teams score at the end of q2
-        uint8 homeQ2LastDigit; // last digit of the home team's cumulative score at the end of q1
-        uint8 homeQ3LastDigit; 
-        uint8 homeFLastDigit; // last digit of the home team's cumulative score at the end of the final period including OT
-        uint8 awayQ1LastDigit; 
-        uint8 awayQ2LastDigit; 
-        uint8 awayQ3LastDigit; 
-        uint8 awayFLastDigit;
-        uint8 qComplete; // the number of the last period that has been completed including OT. expect 100 for the game to be considered final.
-        bool requestInProgress; // true if there is a pending oracle request
-    }
+    uint256 public nextTokenId;
 
     // contest counter
     uint256 public contestIdCounter = 0;
 
     // a list of all contests created
-    mapping (uint256 contestId => Contest contest) public contests;
+    mapping (uint256 contestId => IContestTypes.Contest contest) public contests;
 
     // a list of all contests created by the user
     mapping (address creator => uint256[] contestId) public contestsByUser;
@@ -73,6 +34,9 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
 
     // Game Score Oracle
     GameScoreOracle public gameScoreOracle;
+
+    // Contest Reader
+    ContestsReader public contestsReader;
 
     // Box NFT
     Boxes public boxes;
@@ -92,7 +56,7 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
 
     // modifier to check if caller is the game creator
     modifier onlyContestCreator(uint256 contestId) {
-        Contest memory contest = contests[contestId];
+        IContestTypes.Contest memory contest = contests[contestId];
         if (msg.sender != contest.creator) revert CallerNotContestCreator();
         _;
     }
@@ -139,6 +103,7 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         address treasury_,
         Boxes boxes_,
         GameScoreOracle gameScoreOracle_,
+        ContestsReader contestsReader_,
         address _vrfWrapper
     )
     VRFV2PlusWrapperConsumerBase(_vrfWrapper)
@@ -147,6 +112,7 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         treasury = treasury_;
         boxes = boxes_;
         gameScoreOracle = gameScoreOracle_;
+        contestsReader = contestsReader_;
     }
 
     ////////////////////////////////////////////////
@@ -175,15 +141,15 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         if (gameId == 0) revert GameIdNotSet();
         if (boxCost == 0) revert BoxCostNotSet();
         // create the contest struct
-        Contest memory contest = Contest({
+        IContestTypes.Contest memory contest = IContestTypes.Contest({
             id: contestIdCounter, // the id of the contest
             gameId: gameId, // the game that this contest is tied to
             creator: msg.sender, // sender is the creator
             rows: defaultScores, // default rows
             cols: defaultScores, // default cols
-            boxCost: Cost(boxCurrency, boxCost), // the cost of a box
+            boxCost: IContestTypes.Cost(boxCurrency, boxCost), // the cost of a box
             boxesCanBeClaimed: true, // boxes can be claimed
-            rewardsPaid: RewardPayment(false, false, false, false), // rewards have not been paid out yet
+            rewardsPaid: IContestTypes.RewardPayment(false, false, false, false), // rewards have not been paid out yet
             totalRewards: 0, // total amount collected for the contest
             boxesClaimed: 0, // no boxes have been claimed yet
             randomValues: new uint [](2), // holds random values to be used when assigning values to rows and cols
@@ -195,8 +161,8 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         contestsByUser[msg.sender].push(contestIdCounter);
         // mint 100 nfts for this contest
         for (uint8 i = 0; i < NUM_BOXES_IN_CONTEST;) {
-            boxes.mint(_nextTokenId);
-            unchecked{ ++_nextTokenId; }
+            boxes.mint(nextTokenId);
+            unchecked{ ++nextTokenId; }
             unchecked{ ++i; }
         }
         // emit event
@@ -210,7 +176,7 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
      */
     function claimBoxes(uint256 contestId, uint256[] memory tokenIds, address player) external payable {
         // fetch the contest
-        Contest memory contest = contests[contestId];
+        IContestTypes.Contest memory contest = contests[contestId];
         // check to make sure that the contest still allows for boxes to be claimed
         if (!contest.boxesCanBeClaimed) revert BoxesCannotBeClaimed();
         // determine cost based on number of boxes to claim
@@ -225,7 +191,7 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         }
         // claim the boxes
         for (uint8 i = 0; i < numBoxesToClaim;) {
-            if (i >= _nextTokenId) revert BoxDoesNotExist();
+            if (i >= nextTokenId) revert BoxDoesNotExist();
             // boxes that are claimed must exist within the 10x10 grid
             uint256 tokenId = tokenIds[i];
             // check to make sure the box they are trying to claim isnt already claimed
@@ -255,48 +221,52 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         }
     }
 
-    /**
-        Claim reward
-     */
     function claimReward(uint256 contestId, uint256 tokenId) external {
-        // fetch the contest
-        Contest memory contest = contests[contestId];
-        // check to make sure that the contest rewards are able to be claimed
+        IContestTypes.Contest storage contest = contests[contestId];
         if (!contest.randomValuesSet) revert RewardsNotClaimable();
-        // get the scores assigned to the boxes
-        (uint256 rowScore, uint256 colScore) = _fetchBoxScores(contest, tokenId);
-        // fetch the game scores
-        GameScore memory gameScores_ = getGameScores(contest.gameId);
-        // calculate the total reward
-        uint256 userReward;
-        // check q1
-        if (!contest.rewardsPaid.q1Paid && gameScores_.qComplete >= 1 && gameScores_.awayQ1LastDigit == rowScore && gameScores_.homeQ1LastDigit == colScore) {
-            userReward += contest.totalRewards * Q1_PAYOUT / PERCENT_DENOMINATOR;
-            contest.rewardsPaid.q1Paid = true;
-        }
-        // check q2
-        if (!contest.rewardsPaid.q2Paid && gameScores_.qComplete >= 2 && gameScores_.awayQ2LastDigit == rowScore && gameScores_.homeQ2LastDigit == colScore) {
-            userReward += contest.totalRewards * Q2_PAYOUT / PERCENT_DENOMINATOR;
-            contest.rewardsPaid.q2Paid = true;
-        }
-        // check q3
-        if (!contest.rewardsPaid.q3Paid && gameScores_.qComplete >= 3 && gameScores_.awayQ3LastDigit == rowScore && gameScores_.homeQ3LastDigit == colScore) {
-            userReward += contest.totalRewards * Q3_PAYOUT / PERCENT_DENOMINATOR;
-            contest.rewardsPaid.q3Paid = true;
-        }
-        // check final
-        if (!contest.rewardsPaid.finalPaid && gameScores_.qComplete > 99 && gameScores_.awayFLastDigit == rowScore && gameScores_.homeFLastDigit == colScore) {
-            userReward += contest.totalRewards * FINAL_PAYOUT / PERCENT_DENOMINATOR;
-            contest.rewardsPaid.finalPaid = true;
-            // send the treasury fee when the final score is paid out
-            _sendTreasuryFee(contest.totalRewards, contest.boxCost.currency);
-        }
-        // set the contest
-        contests[contestId] = contest;
-        // send the reward to the box owner
+
+        (uint256 rowScore, uint256 colScore) = fetchBoxScores(contest.id, tokenId);
+        IContestTypes.GameScore memory gameScores_ = getGameScores(contest.gameId);
+        uint8[] memory winningQuarters = getWinningQuarters(contest.id, rowScore, colScore, gameScores_);
+
+        uint256 userReward = calculateAndUpdateRewards(contest, winningQuarters);
+
         if (userReward > 0) {
             _sendReward(boxes.ownerOf(tokenId), userReward, contest.boxCost.currency);
         }
+    }
+
+    function calculateAndUpdateRewards(IContestTypes.Contest storage contest, uint8[] memory winningQuarters) internal returns (uint256) {
+        uint256 userReward = 0;
+        bool finalPaid = false;
+
+        for (uint8 i = 0; i < winningQuarters.length; i++) {
+            uint8 quarter = winningQuarters[i];
+            if (!isRewardPaidForQuarter(contest.id, quarter)) {
+                userReward += calculateQuarterReward(contest, quarter);
+                updateRewardPayment(contest, quarter);
+                if (quarter == 4) {
+                    finalPaid = true;
+                }
+            }
+        }
+
+        if (finalPaid) {
+            _sendTreasuryFee(contest.totalRewards, contest.boxCost.currency);
+        }
+
+        return userReward;
+    }
+
+    function calculateQuarterReward(IContestTypes.Contest memory contest, uint8 quarter) internal pure returns (uint256) {
+        return contest.totalRewards * getQuarterPayout(quarter) / PERCENT_DENOMINATOR;
+    }
+
+    function updateRewardPayment(IContestTypes.Contest storage contest, uint8 quarter) internal {
+        if (quarter == 1) contest.rewardsPaid.q1Paid = true;
+        else if (quarter == 2) contest.rewardsPaid.q2Paid = true;
+        else if (quarter == 3) contest.rewardsPaid.q3Paid = true;
+        else if (quarter == 4) contest.rewardsPaid.finalPaid = true;
     }
 
     function fetchFreshGameScores(
@@ -325,7 +295,7 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
      */
     function _fetchRandomValues (uint256 _contestId) internal {
         // fetch the contest
-        Contest memory contest = contests[_contestId];
+        IContestTypes.Contest memory contest = contests[_contestId];
         // do not allow for another chainlink request if one has already been made
         if (contest.randomValuesSet) revert RandomValuesAlreadyFetched();
         // fetch 2 random numbers from chainlink: one for rows, and one for cols
@@ -408,22 +378,6 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
     }
 
     /**
-        Given a contest and tokenId, return the assigned scores for the box's row and col position
-     */
-    function _fetchBoxScores(
-        Contest memory contest, uint256 tokenId
-    ) internal pure returns(uint256 rowScore, uint256 colScore) {
-        uint256 boxId = tokenId % 100; // makes this a number between 0-99
-        // get the row and col positions of the box
-        uint256 colPosition = boxId % 10; // box 45 becomes 5, 245 becomes 5, etc.
-        uint256 rowPosition = (boxId - colPosition) * 100 / 1000; // 92 - 2 = 90. 90 * 100 = 9000. 9000 / 1000 = 9th row
-        // get the scores of the box
-        rowScore = contest.rows[rowPosition];
-        colScore = contest.cols[colPosition];
-        return (rowScore, colScore);
-    }
-
-    /**
         Chainlink's callback to provide us with randomness
      */
     function fulfillRandomWords(
@@ -433,7 +387,7 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         // the contest id that made this request
         uint256 contestId = vrfScoreAssignments[requestId];
         // fetch the contest object from the id
-        Contest memory contest = contests[contestId];
+        IContestTypes.Contest memory contest = contests[contestId];
         // flag that chainlink has provided this contest with random values
         contest.randomValuesSet = true;
         // randomly assign scores to the rows and cols
@@ -492,8 +446,86 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
     ////////////////////////////////////////////////
     ///////////      READ FUNCTIONS      ///////////
     ////////////////////////////////////////////////
+    /**
+        Given a contest and tokenId, return the assigned scores for the box's row and col position
+     */
+    function fetchBoxScores(
+        uint256 contestId, uint256 tokenId
+    ) public view returns(uint256 rowScore, uint256 colScore) {
+        IContestTypes.Contest memory contest = contests[contestId];
+        uint256 boxId = tokenId % 100; // makes this a number between 0-99
+        // get the row and col positions of the box
+        uint256 colPosition = boxId % 10; // box 45 becomes 5, 245 becomes 5, etc.
+        uint256 rowPosition = (boxId - colPosition) * 100 / 1000; // 92 - 2 = 90. 90 * 100 = 9000. 9000 / 1000 = 9th row
+        // get the scores of the box
+        rowScore = contest.rows[rowPosition];
+        colScore = contest.cols[colPosition];
+        return (rowScore, colScore);
+    }
 
-    function getGameScores(uint256 gameId) public view returns (GameScore memory) {
+    function isWinner(uint256 rowScore, uint256 colScore, uint8 homeLastDigit, uint8 awayLastDigit, uint8 qComplete, uint8 quarter) public pure returns (bool) {
+        if (quarter == 1) {
+            return qComplete >= 1 && awayLastDigit == rowScore && homeLastDigit == colScore;
+        } else if (quarter == 2) {
+            return qComplete >= 2 && awayLastDigit == rowScore && homeLastDigit == colScore;
+        } else if (quarter == 3) {
+            return qComplete >= 3 && awayLastDigit == rowScore && homeLastDigit == colScore;
+        } else if (quarter == 4) {
+            return qComplete > 99 && awayLastDigit == rowScore && homeLastDigit == colScore;
+        }
+        return false;
+    }
+
+    function isRewardPaidForQuarter(uint256 contestId, uint8 quarter) public view returns (bool) {
+        IContestTypes.Contest memory contest = contests[contestId];
+
+        if (quarter == 1) return contest.rewardsPaid.q1Paid;
+        if (quarter == 2) return contest.rewardsPaid.q2Paid;
+        if (quarter == 3) return contest.rewardsPaid.q3Paid;
+        if (quarter == 4) return contest.rewardsPaid.finalPaid;
+        return false;
+    }
+
+    function getQuarterPayout(uint8 quarter) internal pure returns (uint256) {
+        if (quarter == 1) return Q1_PAYOUT;
+        if (quarter == 2) return Q2_PAYOUT;
+        if (quarter == 3) return Q3_PAYOUT;
+        if (quarter == 4) return FINAL_PAYOUT;
+        return 0;
+    }
+    
+    function getGameIdForContest (uint256 contestId) public view returns (uint256) {
+        return contests[contestId].gameId;
+    }
+
+    /**
+        Read the scores of the cols of a contest
+     */
+    function fetchContestCols(uint256 contestId) external view returns (uint8[] memory) {
+        // fetch the contest object from the id
+        IContestTypes.Contest memory contest = contests[contestId];
+        return (contest.cols);
+    }
+
+    /**
+        Read the scores of the rows of a contest
+     */
+    function fetchContestRows(uint256 contestId) external view returns (uint8[] memory) {
+        // fetch the contest object from the id
+        IContestTypes.Contest memory contest = contests[contestId];
+        return (contest.rows);
+    }
+
+    function getWinningQuarters(uint256 contestId, uint256 rowScore, uint256 colScore, IContestTypes.GameScore memory gameScores) public view returns (uint8[] memory) {
+        IContestTypes.Contest memory contest = contests[contestId];
+        if (!contest.randomValuesSet) {
+            return new uint8[](0);
+        }
+
+        return contestsReader.calculateWinningQuarters(rowScore, colScore, gameScores);
+    }
+
+    function getGameScores(uint256 gameId) public view returns (IContestTypes.GameScore memory) {
         (
             uint8 homeQ1LastDigit,
             uint8 homeQ2LastDigit,
@@ -506,7 +538,7 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
             uint8 qComplete,
             bool requestInProgress
         ) = gameScoreOracle.getGameScores(gameId);
-        return GameScore({
+        return IContestTypes.GameScore({
             id: gameId,
             homeQ1LastDigit: homeQ1LastDigit,
             homeQ2LastDigit: homeQ2LastDigit,
@@ -520,73 +552,7 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
             requestInProgress: requestInProgress
         });
     }
-    /**
-        Read all contests with owned boxes by user
-     */
-    function fetchAllContestsWithUser(address user) external view returns (uint256[] memory) {
-        uint256 tokenCount = boxes.balanceOf(user);
-        uint256[] memory contestIds = new uint256[](tokenCount);
-        uint256 uniqueContestCount = 0;
 
-        for (uint256 i = 0; i < tokenCount; i++) {
-            uint256 tokenId = boxes.tokenOfOwnerByIndex(user, i);
-            uint256 contestId = tokenId / 100;
-            
-            // Check if this contestId is already in the array
-            bool isUnique = true;
-            for (uint256 j = 0; j < uniqueContestCount; j++) {
-                if (contestIds[j] == contestId) {
-                    isUnique = false;
-                    break;
-                }
-            }
-            
-            // If it's a unique contestId, add it to the array
-            if (isUnique) {
-                contestIds[uniqueContestCount] = contestId;
-                uniqueContestCount++;
-            }
-        }
-
-        // Create a new array with only the unique contest IDs
-        uint256[] memory uniqueContestIds = new uint256[](uniqueContestCount);
-        for (uint256 i = 0; i < uniqueContestCount; i++) {
-            uniqueContestIds[i] = contestIds[i];
-        }
-
-        return uniqueContestIds;
-    }
-
-    /**
-        Read all boxes by the contest
-     */
-    function fetchAllBoxesByContest(uint256 contestId) external pure returns (uint256[] memory tokenIds) {
-        // get the 100 nfts that belong to this contest.
-        // nfts 0-99 belong to game 0, 100-199 belong to game 1, etc.
-        tokenIds = new uint256[](NUM_BOXES_IN_CONTEST);
-        for (uint8 i = 0; i < NUM_BOXES_IN_CONTEST;) {
-            tokenIds[i] = contestId * 100 + i;
-            unchecked{ ++i; }
-        }
-    }
-
-    /**
-        Read the scores of the rows of a contest
-     */
-    function fetchContestRows(uint256 contestId) external view returns (uint8[] memory) {
-        // fetch the contest object from the id
-        Contest memory contest = contests[contestId];
-        return (contest.rows);
-    }
-
-    /**
-        Read the scores of the cols of a contest
-     */
-    function fetchContestCols(uint256 contestId) external view returns (uint8[] memory) {
-        // fetch the contest object from the id
-        Contest memory contest = contests[contestId];
-        return (contest.cols);
-    }
 
     function getTokenIdContestNumber(uint256 tokenId) public pure returns (uint256) {
         return tokenId / 100;
