@@ -9,6 +9,26 @@ import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/l
 contract GameScoreOracle is ConfirmedOwner, FunctionsClient {
     using FunctionsRequest for FunctionsRequest.Request;
 
+    string public constant SOURCE =
+        "const eventId=args[0];"
+        "const url='https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary';"
+        "const sportsApiRequest=Functions.makeHttpRequest({url:url+'?event='+eventId,headers:{\"Content-Type\":\"application/json\",}});"
+        "const sportsApiResponse=await sportsApiRequest;"
+        "if(sportsApiResponse.error){console.error(JSON.stringify(sportsApiResponse));console.error(sportsApiResponse.error);throw Error(\"Request failed\")}"
+        "const data=sportsApiResponse.data;if(data.Response===\"Error\"){console.error(data.Message);throw Error('Functional error. Read message: '+data.Message)}"
+        "const teams=data.header.competitions[0].competitors;const homeTeam=teams.find(team=>team.homeAway===\"home\");const awayTeam=teams.find(team=>team.homeAway===\"away\");if(!homeTeam||!awayTeam){throw Error(\"Unable to find home or away team\")}"
+        "const qComplete=data.header.competitions[0].status.type.completed?100:data.header.competitions[0].status.period-1;const homeTeamScores=homeTeam.linescores;const homeQ1=qComplete<1?0:parseInt(homeTeamScores[0]?.[\"displayValue\"]||0);const homeQ2=qComplete<2?0:parseInt(homeTeamScores[1]?.[\"displayValue\"]||0);const homeQ3=qComplete<3?0:parseInt(homeTeamScores[2]?.[\"displayValue\"]||0);const homeF=qComplete<100?0:parseInt(homeTeam.score?.slice(-1)||0);const homeQ1LastDigit=qComplete<1?0:parseInt(homeQ1.toString().slice(-1));const homeQ2LastDigit=qComplete<2?0:parseInt((homeQ1+homeQ2).toString().slice(-1));const homeQ3LastDigit=qComplete<3?0:parseInt((homeQ1+homeQ2+homeQ3).toString().slice(-1));const homeFLastDigit=parseInt(homeF);"
+        "const awayTeamScores=awayTeam.linescores;const awayQ1=qComplete<1?0:parseInt(awayTeamScores[0]?.[\"displayValue\"]||0);const awayQ2=qComplete<2?0:parseInt(awayTeamScores[1]?.[\"displayValue\"]||0);const awayQ3=qComplete<3?0:parseInt(awayTeamScores[2]?.[\"displayValue\"]||0);const awayF=qComplete<100?0:parseInt(awayTeam.score?.slice(-1)||0);const awayQ1LastDigit=qComplete<1?0:parseInt(awayQ1.toString().slice(-1));const awayQ2LastDigit=qComplete<2?0:parseInt((awayQ1+awayQ2).toString().slice(-1));const awayQ3LastDigit=qComplete<3?0:parseInt((awayQ1+awayQ2+awayQ3).toString().slice(-1));const awayFLastDigit=parseInt(awayF);"
+        "function numberToUint256(num){const hex=BigInt(num).toString(16);return hex.padStart(64,'0')}"
+        "function packDigits(...digits){return digits.reduce((acc,val)=>acc*10+val,0)}"
+        "const digits=packDigits(homeQ1LastDigit,homeQ2LastDigit,homeQ3LastDigit,homeFLastDigit,awayQ1LastDigit,awayQ2LastDigit,awayQ3LastDigit,awayFLastDigit);const packedResult=[digits,qComplete,];"
+        "const encodedResult='0x'+packedResult.map(numberToUint256).join('');"
+        "function hexToUint8Array(hexString){if(hexString.startsWith('0x')){hexString=hexString.slice(2)}"
+        "const byteArray=new Uint8Array(hexString.length/2);for(let i=0;i<byteArray.length;i++){byteArray[i]=parseInt(hexString.substr(i*2,2),16)}"
+        "return byteArray}"
+        "const uint8ArrayResult=hexToUint8Array(encodedResult);"
+        "return uint8ArrayResult";
+
     struct GameScore {
         uint256 id; // a unique id for this game determined by the outside world data set
         uint8 homeQ1LastDigit; // last digit of the home teams score at the end of q2
@@ -76,7 +96,6 @@ contract GameScoreOracle is ConfirmedOwner, FunctionsClient {
 
     /**
      * @notice Send a simple request
-     * @param source JavaScript source code
      * @param args List of arguments accessible from within the source code
      * @param subscriptionId Billing ID
      * @param gasLimit Gas limit for the request
@@ -84,7 +103,6 @@ contract GameScoreOracle is ConfirmedOwner, FunctionsClient {
      * @param gameId The unique id of the game to fetch scores for
      */
     function fetchGameScores(
-        string memory source,
         string[] memory args,
         uint64 subscriptionId,
         uint32 gasLimit,
@@ -101,7 +119,7 @@ contract GameScoreOracle is ConfirmedOwner, FunctionsClient {
 
         // create a chainlink request
         FunctionsRequest.Request memory req;
-        req.initializeRequestForInlineJavaScript(source);
+        req.initializeRequestForInlineJavaScript(SOURCE);
         if (args.length > 0) req.setArgs(args);
         // store the requestId so we can map it back to the game when fulfilled
         requestId = _sendRequest(

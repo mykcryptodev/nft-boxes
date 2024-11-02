@@ -272,7 +272,6 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
     }
 
     function fetchFreshGameScores(
-        string memory source,
         string[] memory args,
         uint64 subscriptionId,
         uint32 gasLimit,
@@ -280,7 +279,6 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         uint256 gameId
     ) external {
         gameScoreOracle.fetchGameScores(
-            source,
             args,
             subscriptionId,
             gasLimit,
