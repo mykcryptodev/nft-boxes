@@ -1,6 +1,5 @@
 import { type Token } from "@coinbase/onchainkit/token";
-import { LifecycleStatus, Transaction, TransactionButton } from '@coinbase/onchainkit/transaction';
-import { useRouter } from "next/router";
+import { type LifecycleStatus, Transaction, TransactionButton } from '@coinbase/onchainkit/transaction';
 import { type FC, useCallback, useEffect,useMemo, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { createThirdwebClient, encode, getContract, toUnits } from "thirdweb";
@@ -31,7 +30,6 @@ const SeasonMap = {
 } as SeasonMapT;
 
 export const ContestForm: FC = () => {
-  const router = useRouter();
   const { data: currentWeek } = api.game.getCurrentWeek.useQuery();
   const { data: currentSeason } = api.game.getCurrentSeason.useQuery();
   const { register, handleSubmit, watch, reset } = useForm<FormInput>({

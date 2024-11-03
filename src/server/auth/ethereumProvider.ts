@@ -1,5 +1,6 @@
 import { type User } from "@prisma/client";
 import type { NextAuthOptions } from "next-auth";
+import { DEFAULT_CHAIN } from "~/constants";
 
 import verifySignature from "~/helpers/verifySignature";
 import { db } from "~/server/db";
@@ -26,6 +27,7 @@ export const EthereumProvider = ({ createUser }: EthereumProviderConfig): NextAu
         credentials.message,
         credentials.signature,
         credentials.address as `0x${string}`,
+        DEFAULT_CHAIN.id,
       );
 
       if (isValid) {

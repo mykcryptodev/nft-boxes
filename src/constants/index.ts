@@ -1,13 +1,48 @@
-import { baseSepolia, type Chain } from "wagmi/chains";
+import { base, baseSepolia, type Chain } from "wagmi/chains";
 
 export const APP_NAME = "Onchain NFL Boxes";
 export const APP_DESCRIPTION = "Create an Onchain Game!";
 export const APP_URL = "https://yourgame.com";
-export const SUPPORTED_CHAINS: readonly [Chain, ...Chain[]] = [baseSepolia];
+export const SUPPORTED_CHAINS: readonly [Chain, ...Chain[]] = [baseSepolia, base];
 export const DEFAULT_CHAIN = SUPPORTED_CHAINS[0];
 export const EAS_SCHEMA_ID = "0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9";
 
 import { type Token } from "@coinbase/onchainkit/token";
+
+export const EMOJI_TEAM_MAP: Record<string, string> = {
+  ["49ers"]: "🌉",
+  ["Bears"]: "🐻",
+  ["Bengals"]: "🐅",
+  ["Bills"]: "🦬",
+  ["Broncos"]: "🐴",
+  ["Browns"]: "🐶",
+  ["Buccaneers"]: "🏴‍☠️",
+  ["Cardinals"]: "🐓",
+  ["Chargers"]: "⚡",
+  ["Chiefs"]: "🪶",
+  ["Colts"]: "🐎",
+  ["Cowboys"]: "⭐️",
+  ["Dolphins"]: "🐬",
+  ["Eagles"]: "🦅",
+  ["Falcons"]: "🐦",
+  ["Giants"]: "🗽",
+  ["Jaguars"]: "🐆",
+  ["Jets"]: "🛩",
+  ["Lions"]: "🦁",
+  ["Packers"]: "🧀",
+  ["Panthers"]: "🐈‍⬛",
+  ["Patriots"]: "🇺🇸",
+  ["Raiders"]: "☠️",
+  ["Rams"]: "🐏",
+  ["Ravens"]: "🐦‍⬛",
+  ["Saints"]: "⚜️",
+  ["Seahawks"]: "🦚",
+  ["Steelers"]: "🔨",
+  ["Texans"]: "🤠",
+  ["Titans"]: "🎖️",
+  ["Vikings"]: "🗡️",
+  ["Washington"]: "🏛",
+}
 
 export const ETH_TOKEN: Token = {
   address: '0x0000000000000000000000000000000000000000',
