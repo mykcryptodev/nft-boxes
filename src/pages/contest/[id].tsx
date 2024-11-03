@@ -1,25 +1,25 @@
 import { type GetServerSideProps, type NextPage } from "next";
 
-import Game from "~/components/Game";
+import Contest from "~/components/Contest";
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.query;
   return {
     props: {
-      gameId: id,
+      contestId: id,
     },
   };
 };
 
 type Props = {
-  gameId: string;
+  contestId: string;
 }
-const GamePage: NextPage<Props> = ({ gameId }) => {
+const ContestPage: NextPage<Props> = ({ contestId }) => {
   return (
     <div>
-      <Game gameId={gameId} />    
+      <Contest contestId={contestId} />    
     </div>
   )
 }
 
-export default GamePage;
+export default ContestPage;

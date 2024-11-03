@@ -10,10 +10,12 @@ function delay(ms: number) {
 
 const FUNCTIONS_ROUTER = {
   "84532": "0xf9B8fc078197181C841c296C876945aaa425B278",
+  "8453": "0xf9b8fc078197181c841c296c876945aaa425b278",
 }
 
 const VRF_WRAPPER = {
   "84532": "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed",
+  "8453": "0xd5d517abe5cf79b7e95ec98db0f0277788aff634",
 }
 interface ContractToVerify {
   name: string;

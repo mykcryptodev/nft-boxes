@@ -64,7 +64,7 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
     ////////////////////////////////////
     ///////////    EVENTS    ///////////
     ////////////////////////////////////
-    event ContestCreated(uint256 contestId); // someone made a new contest
+    event ContestCreated(uint256 contestId, address indexed creator); // someone made a new contest
     event ScoresAssigned(uint256 contestId); // rows and cols were assigned values via the random values from chainlink
     event ScoresRequested(uint256 contestId); // someone requested random numbers for their rows and cols
     event BoxClaimed(uint256 contestId, uint256 tokenId); // someone claimed a box
@@ -167,7 +167,7 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
             unchecked{ ++i; }
         }
         // emit event
-        emit ContestCreated(contestIdCounter);
+        emit ContestCreated(contestIdCounter, msg.sender);
         // increment for the next contest that gets created
         unchecked{ ++contestIdCounter; }
     }

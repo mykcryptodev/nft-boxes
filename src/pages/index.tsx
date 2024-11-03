@@ -1,8 +1,8 @@
 import Head from "next/head";
+import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useAccount } from "wagmi";
 
-import CreateGame from "~/components/Game/Create";
 import { Wallet } from "~/components/Wallet";
 import SignInWithEthereum from "~/components/Wallet/SignIn";
 import { APP_DESCRIPTION, APP_NAME } from "~/constants";
@@ -30,7 +30,9 @@ export default function Home() {
             <SignInWithEthereum btnLabel="Sign In To Play" />
           )}
           {address && sessionData?.user && (
-            <CreateGame btnLabel="Start Game" />
+            <Link href="/contest/create" className="btn btn-primary">
+              Create Contest
+            </Link>
           )}
         </div>
       </main>
