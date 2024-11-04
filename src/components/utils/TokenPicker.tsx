@@ -6,8 +6,8 @@ import { base } from "viem/chains";
 import { useAccount,useReadContract } from "wagmi";
 
 import { Portal } from "~/components/utils/Portal";
-import { DEFAULT_CHAIN, DEFAULT_TOKENS, ETH_TOKEN } from "~/constants";
-
+import { DEFAULT_CHAIN } from "~/constants";
+import { DEFAULT_TOKENS, ETH_TOKEN } from "~/constants/tokens";
 type Props = {
   onTokenSelected: (token: Token) => void;
   selectedToken?: Token;

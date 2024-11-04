@@ -1,5 +1,6 @@
-import { type FC } from "react";
+import { type FC,useEffect } from "react";
 
+import { RefreshOnchainScores } from "~/components/Contest/RefreshOnchainScores";
 import { EMOJI_TEAM_MAP } from "~/constants";
 import useScoresOnchain from "~/hooks/useScoresOnchain";
 import { type Competitor, type Game } from "~/types/game";
@@ -11,7 +12,14 @@ type Props = {
 
 export const Scoreboard: FC<Props> = ({ contestId, game }) => {
   const { data: scoresOnchain, refetch } = useScoresOnchain(contestId);
-  console.log({ scoresOnchain });
+  // refetch every 10 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, 1000 * 60 * 10);
+    return () => clearInterval(interval);
+  }, [refetch]);
+
   const homeTeam = game.competitions[0]?.competitors.find(
     (competitor) => competitor.homeAway === 'home'
   );
@@ -44,14 +52,13 @@ export const Scoreboard: FC<Props> = ({ contestId, game }) => {
       <div className="tooltip cursor-pointer" data-tip={`${isOnchain ? `${name} scores are saved onchain` : `${name} scores are not yet onchain`}`}>
         <div className="flex w-full justify-center items-center gap-1">
           <div>{name}</div>
-          <div className={`w-2 h-2 rounded-full bg-${isOnchain ? 'primary' : 'warning'}`} />
+          <div className={`w-2 h-2 rounded-full ${isOnchain ? 'bg-primary' : 'bg-warning'}`} />
         </div>
       </div>
     )
   };
 
   const Score: FC<{ quarter: number, team: Competitor | undefined  }> = ({ quarter, team }) => {
-    // const isOnchain = (scoresOnchain?.qComplete ?? 0) >= quarter;
     const gameIsOver = game.competitions?.[0]?.status?.type?.completed ?? false;
     const isInProgress = currentQuarter <= quarter && !gameIsOver;
     return (
@@ -65,7 +72,7 @@ export const Scoreboard: FC<Props> = ({ contestId, game }) => {
     <div className="bg-base-200 flex flex-col gap-2 p-4 rounded-lg text-center">
       <div className="grid grid-cols-5 gap-2 border-b-2">
         <div>
-          Fetch Game Data
+          <RefreshOnchainScores gameId={game.id} />
         </div>
         <Quarter number={1} name={"Q1"} />
         <Quarter number={2} name={"Q2"} />

@@ -3,11 +3,11 @@ import { type LifecycleStatus, Transaction, TransactionButton } from '@coinbase/
 import { type FC, useCallback, useEffect,useMemo, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { createThirdwebClient, encode, getContract, toUnits } from "thirdweb";
-import { type Address } from "viem";
 
 import TokenPicker from "~/components/utils/TokenPicker";
-import { DEFAULT_CHAIN, ETH_TOKEN } from "~/constants";
+import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
+import { ETH_TOKEN } from "~/constants/tokens";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
 import { createContest } from "~/thirdweb/84532/0xb9647d7982cefb104d332ba818b8971d76e7fa1f";
@@ -87,28 +87,19 @@ export const ContestForm: FC = () => {
     const client = createThirdwebClient({
         clientId: env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
     });
-    console.log({ boxCost, boxCurrency })
-    console.log("currency decimals", BigInt(toUnits(boxCost.toString(), boxCurrency.decimals)));
     const createContestCall = createContest({
       contract: getContract({
-          chain: getThirdwebChain(DEFAULT_CHAIN),
-          address: CONTEST_CONTRACT[DEFAULT_CHAIN.id]!,
-          client,
+        chain: getThirdwebChain(DEFAULT_CHAIN),
+        address: CONTEST_CONTRACT[DEFAULT_CHAIN.id]!,
+        client,
       }),
       gameId: BigInt(gameId),
       boxCost: BigInt(toUnits(boxCost.toString(), boxCurrency.decimals)),
       boxCurrency: boxCurrency.address,
     });
 
-    console.log({ createContestCall: [{
-      to: CONTEST_CONTRACT[DEFAULT_CHAIN.id] as Address,
-      data: await encode(createContestCall),
-        value: BigInt(0),
-      }]
-    })
-
     return [{
-      to: CONTEST_CONTRACT[DEFAULT_CHAIN.id] as Address,
+      to: CONTEST_CONTRACT[DEFAULT_CHAIN.id]!,
       data: await encode(createContestCall),
       value: BigInt(0),
     }];

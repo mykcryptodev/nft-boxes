@@ -1,31 +1,34 @@
-import type { FC } from "react";
+import { type FC,useState } from "react";
 
+import Box from "~/components/Contest/Box";
+import { BuyBoxes } from "~/components/Contest/BuyBoxes";
 import Scoreboard from "~/components/Contest/Scoreboard";
 import TeamName from "~/components/Contest/TeamName";
 import useContest from "~/hooks/useContest";
-import useGameIdForContest from "~/hooks/useGameIdForContest";
 import { api } from "~/utils/api";
+
 type GameProps = {
   contestId: string;
 };
 const Contest: FC<GameProps> = ({ contestId }) => {
-  const { data: contest } = useContest(contestId);
-  console.log({contest});
-  const { data: gameId } = useGameIdForContest(contestId);
+  const { data: contest, refetch } = useContest(contestId);
+  const [contestKey, setContestKey] = useState<number>(0);
   const { data: game } = api.game.get.useQuery({
-    id: Number(gameId),
+    id: Number(contest?.gameId),
   }, {
-    enabled: gameId !== undefined,
+    enabled: contest?.gameId !== undefined,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    refetchInterval: 1000 * 60 * 10, // Refresh every 10 minutes
   });
+  const [selectedBoxIds, setSelectedBoxIds] = useState<number[]>([]);
 
   if (!game || !contest) {
     return null;
   }
 
   return (
-    <div>
+    <div key={contestKey}>
       <Scoreboard contestId={contestId} game={game} />
       <div className="grid grid-cols-12 mt-2">
         <div className="grid col-span-1" />
@@ -53,23 +56,44 @@ const Contest: FC<GameProps> = ({ contestId }) => {
               if (i % 11 === 0 || i < 11) {
                 if (contest.randomValuesSet) {
                   return (
-                    <div key={i} className={`border-2 rounded-lg box-border w-full h-full aspect-square grid place-content-center bg-base-200`}>
+                    <div key={i} className={`border-2 rounded-lg w-full h-full aspect-square grid place-content-center bg-base-200`}>
                       {(i === 0) ? '' : (rowNumber === 0) ? contest.cols[colNumber - 1] : (colNumber === 0) ? contest.rows[rowNumber - 1] : ''}
                     </div>
                   )
                 }
                 return (
-                  <div key={i} className={`border-2 rounded-lg box-border w-full h-full aspect-square grid place-content-center bg-base-200`} />
+                  <div key={i} className={`border-2 rounded-lg w-full h-full aspect-square grid place-content-center bg-base-200`} />
                 )
               }
-              <div className="w-4 h-4 bg-base-200" />
               return (
-                <div key={i} className="h-full w-full bg-base-300 animate-pulse rounded-lg"></div>
+                <Box
+                  key={i} 
+                  boxId={boxId + (Number(contestId) * 100)}
+                  boxesAddress={contest.boxesAddress}
+                  selectedBoxIds={selectedBoxIds}
+                  onBoxSelected={(boxId) => {
+                    setSelectedBoxIds((prev) => [...prev, boxId]);
+                  }}
+                  onBoxUnselected={(boxId) => {
+                    setSelectedBoxIds((prev) => prev.filter((id) => id !== boxId));
+                  }}
+                />
               )
             })}
           </div>
         </div>
       </div>
+      <BuyBoxes 
+        key={contestKey}
+        contest={contest}
+        selectedBoxes={selectedBoxIds} 
+        setSelectedBoxes={setSelectedBoxIds} 
+        onBoxBuySuccess={() => {
+          setSelectedBoxIds([]);
+          setContestKey((prev) => prev + 1);
+          void refetch();
+        }}
+      />
     </div>
   );
 };

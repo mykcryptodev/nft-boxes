@@ -5,9 +5,8 @@ import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
+import useGameIdForContest from "~/hooks/useGameIdForContest";
 import { getGameScores } from "~/thirdweb/84532/0xb9647d7982cefb104d332ba818b8971d76e7fa1f";
-
-import useGameIdForContest from "./useGameIdForContest";
 
 type ScoresOnChain = {
   awayFLastDigit: number;

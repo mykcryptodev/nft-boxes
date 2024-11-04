@@ -1,7 +1,7 @@
 import { type User } from "@prisma/client";
 import type { NextAuthOptions } from "next-auth";
-import { DEFAULT_CHAIN } from "~/constants";
 
+import { DEFAULT_CHAIN } from "~/constants";
 import verifySignature from "~/helpers/verifySignature";
 import { db } from "~/server/db";
 
