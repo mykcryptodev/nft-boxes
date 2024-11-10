@@ -1,5 +1,6 @@
 import { type LifecycleStatus, Transaction, TransactionButton } from "@coinbase/onchainkit/transaction";
-import { type FC,useCallback } from "react";
+import { watchContractEvent } from '@wagmi/core'
+import { type FC,useCallback, useRef, useState } from "react";
 import { createThirdwebClient, encode, getContract } from "thirdweb";
 import { useReadContract } from "wagmi";
 
@@ -7,6 +8,7 @@ import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
+import { wagmiConfig } from "~/providers/OnchainProviders";
 import { fetchRandomValues } from "~/thirdweb/84532/0xb9647d7982cefb104d332ba818b8971d76e7fa1f";
 import { type Contest } from "~/types/contest";
 
@@ -16,12 +18,40 @@ type Props = {
 }
 
 export const GenerateRandomValues: FC<Props> = ({ contest, onValuesGenerated }) => {
+  const [showWaitingInfo, setShowWaitingInfo] = useState<boolean>(false);
+  const toastShown = useRef<boolean>(false);
+
   const handleOnStatus = useCallback((status: LifecycleStatus) => {
     if (status.statusName === 'success') {
-      onValuesGenerated();
+      setShowWaitingInfo(true);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const unwatch = watchContractEvent(wagmiConfig, {
+    address: CONTEST_CONTRACT[DEFAULT_CHAIN.id]!,
+    abi: [
+      {
+        name: 'ScoresAssigned',
+        inputs: [
+          {
+            name: 'contestId',
+            type: 'uint256',
+            indexed: false
+          }
+        ],
+        type: 'event',
+      },
+    ],
+    eventName: 'ScoresAssigned',
+    onLogs(logs) {
+      if (logs[0]?.args.contestId === contest.id && !toastShown.current) {
+        toastShown.current = true;
+        unwatch?.();
+        onValuesGenerated();
+      };
+    },
+    pollingInterval: 1_000, 
+  });
   const { data: vrfFee }: { data: bigint | undefined } = useReadContract({
     address: CONTEST_CONTRACT[DEFAULT_CHAIN.id]!,
     abi: [
@@ -79,9 +109,15 @@ export const GenerateRandomValues: FC<Props> = ({ contest, onValuesGenerated }) 
           <p className="py-4">
             Generating random values for rows and columns will prevent any further boxes from being claimed.
           </p>
-          {contest.boxesClaimed !== 100n && (
+          {contest.boxesClaimed !== 100n && !showWaitingInfo && (
             <p className="p-4 bg-warning text-sm text-warning-content rounded-lg">
               <strong>Nobody will be able to claim new boxes after this action is taken.</strong>
+            </p>
+          )}
+          {showWaitingInfo && (
+            <p className="p-4 bg-neutral text-sm text-neutral-content rounded-lg flex items-center">
+              <span className="loading loading-spinner mr-2" />
+              <strong>Applying random values...</strong>
             </p>
           )}
           <div className="modal-action">

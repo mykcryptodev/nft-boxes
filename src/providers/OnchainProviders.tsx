@@ -45,7 +45,7 @@ const connectors = connectorsForWallets(
 // make an object where each key is a chain id and the value is http() transport
 // TODO: make these rpcs non public
 const transports = SUPPORTED_CHAINS.reduce<Record<number, ReturnType<typeof http>>>((acc, chain) => {
-  acc[chain.id] = http();
+  acc[chain.id] = http(`https://${chain.id}.rpc.thirdweb.com/${env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID}`);
   return acc;
 }, {});
 
