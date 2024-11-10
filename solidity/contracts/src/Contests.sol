@@ -54,13 +54,6 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
     // denominator for fees and payouts
     uint256 public constant PERCENT_DENOMINATOR = 1000;
 
-    // modifier to check if caller is the game creator
-    modifier onlyContestCreator(uint256 contestId) {
-        IContestTypes.Contest memory contest = contests[contestId];
-        if (msg.sender != contest.creator) revert CallerNotContestCreator();
-        _;
-    }
-
     ////////////////////////////////////
     ///////////    EVENTS    ///////////
     ////////////////////////////////////
@@ -122,12 +115,17 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
     /**
         Request randomness to assign numbers to rows and cols
         The contest creator can call this before all boxes are claimed
-        however _fetchRandomValues will be called automatically by the 
-        user who claims the last box. Calling this prevents future boxes
-        from being claimed.
+        Calling this prevents future boxes from being claimed.
      */
-    function fetchRandomValues(uint256 _contestId) external payable onlyContestCreator(_contestId) {
+    function fetchRandomValues(uint256 _contestId) external payable {
         if (msg.value < vrfFee) revert InsufficientPayment();
+        // fetch the contest
+        IContestTypes.Contest memory contest = contests[_contestId];
+        // only the contest creator can fetch random values if not all boxes have been claimed
+        if (contest.boxesClaimed != NUM_BOXES_IN_CONTEST) {
+            if (msg.sender != contest.creator) revert CallerNotContestCreator();
+        }
+        // fetch the random values
         _fetchRandomValues(_contestId);
     }
 
@@ -212,10 +210,6 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         contest.totalRewards += totalCost;
         // set the contest changes in state
         contests[contestId] = contest;
-        // if this is the final box claimed, assign the scores of rows and cols randomly
-        if (contest.boxesClaimed == NUM_BOXES_IN_CONTEST) {
-            _fetchRandomValues(contestId);
-        }
 
         // refund any excess ETH that was sent
         if (msg.value > totalCost) {

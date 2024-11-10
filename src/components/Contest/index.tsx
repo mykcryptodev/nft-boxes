@@ -2,6 +2,7 @@ import { type FC,useState } from "react";
 
 import Box from "~/components/Contest/Box";
 import { BuyBoxes } from "~/components/Contest/BuyBoxes";
+import GenerateRandomValues from "~/components/Contest/GenerateRandomValues";
 import Scoreboard from "~/components/Contest/Scoreboard";
 import TeamName from "~/components/Contest/TeamName";
 import useContest from "~/hooks/useContest";
@@ -30,6 +31,14 @@ const Contest: FC<GameProps> = ({ contestId }) => {
   return (
     <div key={contestKey}>
       <Scoreboard contestId={contestId} game={game} />
+      <GenerateRandomValues 
+        contest={contest}
+        onValuesGenerated={() => {
+          setSelectedBoxIds([]);
+          setContestKey((prev) => prev + 1);
+          void refetch();
+        }} 
+      />
       <div className="grid grid-cols-12 mt-2">
         <div className="grid col-span-1" />
         <div className="grid col-span-10 place-content-center text-2xl">
