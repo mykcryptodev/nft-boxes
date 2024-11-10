@@ -1,8 +1,12 @@
 import { type Token } from "@coinbase/onchainkit/token";
 import { type LifecycleStatus, Transaction, TransactionButton } from '@coinbase/onchainkit/transaction';
+import { watchContractEvent } from '@wagmi/core'
+import { useRouter } from "next/router";
 import { type FC, useCallback, useEffect,useMemo, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { createThirdwebClient, encode, getContract, toUnits } from "thirdweb";
+import { isAddress, isAddressEqual, zeroAddress } from "viem";
+import { useAccount } from "wagmi";
 
 import TokenPicker from "~/components/utils/TokenPicker";
 import { DEFAULT_CHAIN } from "~/constants";
@@ -10,6 +14,7 @@ import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { ETH_TOKEN } from "~/constants/tokens";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
+import { wagmiConfig } from "~/providers/OnchainProviders";
 import { createContest } from "~/thirdweb/84532/0xb9647d7982cefb104d332ba818b8971d76e7fa1f";
 import { api } from "~/utils/api";
 
@@ -30,8 +35,10 @@ const SeasonMap = {
 } as SeasonMapT;
 
 export const ContestForm: FC = () => {
+  const router = useRouter();
   const { data: currentWeek } = api.game.getCurrentWeek.useQuery();
   const { data: currentSeason } = api.game.getCurrentSeason.useQuery();
+  const { address } = useAccount();
   const { register, handleSubmit, watch, reset } = useForm<FormInput>({
     defaultValues: {
       gameId: '',
@@ -43,6 +50,44 @@ export const ContestForm: FC = () => {
   const handleOnStatus = useCallback((status: LifecycleStatus) => {
     console.log('LifecycleStatus', status);
   }, []);
+  const unwatch = watchContractEvent(wagmiConfig, {
+    address: CONTEST_CONTRACT[DEFAULT_CHAIN.id]!,
+    abi: [
+      {
+        name: 'ContestCreated',
+        inputs: [
+          {
+            name: 'contestId',
+            type: 'uint256',
+            indexed: true,
+          },
+          {
+            name: 'creator',
+            type: 'address',
+            indexed: true,
+          }
+        ],
+        type: 'event',
+      },
+    ],
+    eventName: 'ContestCreated',
+    onLogs(logs) {
+      console.log({ logs });
+      if (
+        logs[0]?.args.creator && 
+        isAddress(logs[0].args.creator) && 
+        isAddress(address ?? '') &&
+        isAddressEqual(logs[0].args.creator, address ?? zeroAddress)
+      ) {
+        unwatch?.();
+        const contestId = logs[0].args.contestId?.toString();
+        if (contestId) {
+          void router.push(`/contest/${contestId}`);
+        }
+      };
+    },
+    pollingInterval: 1_000, 
+  });
   useEffect(() => {
     reset({
       gameId: '',
