@@ -91,8 +91,8 @@ const Contest: FC<GameProps> = ({ contestId }) => {
                   }}
                   contest={contest}
                   game={game}
-                  row={contest.rows[rowNumber - 1] ?? 0} 
-                  col={contest.cols[colNumber - 1] ?? 0} 
+                  row={rowNumber}
+                  col={colNumber} 
                   scoresOnchain={scoresOnchain}
                 />
               )

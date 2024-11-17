@@ -17,6 +17,9 @@ type Props = {
 export const useBoxIsWinner = ({
   col, row, contest, game, scoresOnchain, owner
 }: Props) => {
+  const homeScore = contest.cols[col - 1];
+  const awayScore = contest.rows[row - 1];
+
   const quarterCompletedLive = useMemo(() => {
     const liveQuarter = game.competitions?.[0]?.status?.period ?? 1;
     if (game.competitions?.[0]?.status?.type?.completed) return 100;
@@ -25,20 +28,31 @@ export const useBoxIsWinner = ({
   
   const winningQuarters = useMemo(() => {
     return {
-      q1: col === scoresOnchain.homeQ1LastDigit && row === scoresOnchain.awayQ1LastDigit && quarterCompletedLive >= 1,
-      q2: col === scoresOnchain.homeQ2LastDigit && row === scoresOnchain.awayQ2LastDigit && quarterCompletedLive >= 2,
-      q3: col === scoresOnchain.homeQ3LastDigit && row === scoresOnchain.awayQ3LastDigit && quarterCompletedLive >= 3,
-      f: col === scoresOnchain.homeFLastDigit && row === scoresOnchain.awayFLastDigit && game.competitions?.[0]?.status?.type?.completed,
+      q1: homeScore === scoresOnchain.homeQ1LastDigit && awayScore === scoresOnchain.awayQ1LastDigit && quarterCompletedLive >= 1,
+      q2: homeScore === scoresOnchain.homeQ2LastDigit && awayScore === scoresOnchain.awayQ2LastDigit && quarterCompletedLive >= 2,
+      q3: homeScore === scoresOnchain.homeQ3LastDigit && awayScore === scoresOnchain.awayQ3LastDigit && quarterCompletedLive >= 3,
+      f: homeScore === scoresOnchain.homeFLastDigit && awayScore === scoresOnchain.awayFLastDigit && game.competitions?.[0]?.status?.type?.completed,
     }
-  }, [col, scoresOnchain.homeQ1LastDigit, scoresOnchain.homeQ2LastDigit, scoresOnchain.homeQ3LastDigit, scoresOnchain.homeFLastDigit, scoresOnchain.awayQ1LastDigit, scoresOnchain.awayQ2LastDigit, scoresOnchain.awayQ3LastDigit, scoresOnchain.awayFLastDigit, row, quarterCompletedLive, game.competitions]);
+  }, [
+    homeScore, 
+    scoresOnchain.homeQ1LastDigit, 
+    scoresOnchain.awayQ1LastDigit, 
+    scoresOnchain.homeQ2LastDigit, 
+    scoresOnchain.awayQ2LastDigit, 
+    scoresOnchain.homeQ3LastDigit, 
+    scoresOnchain.awayQ3LastDigit, 
+    scoresOnchain.homeFLastDigit, 
+    scoresOnchain.awayFLastDigit, 
+    awayScore, 
+    quarterCompletedLive, 
+    game.competitions
+  ]);
 
   const hasWon = useMemo(() => {
-    if (!contest.randomValuesSet) return false;
-    return (winningQuarters.q1 && quarterCompletedLive >= 1) || 
-      (winningQuarters.q2 && quarterCompletedLive >= 2) || 
-      (winningQuarters.q3 && quarterCompletedLive >= 3) || 
-      (winningQuarters.f && game.competitions?.[0]?.status?.type?.completed);
-    }, [contest.randomValuesSet, winningQuarters.q1, winningQuarters.q2, winningQuarters.q3, winningQuarters.f, quarterCompletedLive, game.competitions]);
+    if (!contest.randomValuesSet || scoresOnchain.qComplete === 0) return false;
+    // returns true if any of the winning quarters are true
+    return Object.values(winningQuarters).some(Boolean);
+  }, [contest.randomValuesSet, scoresOnchain.qComplete, winningQuarters]);
 
   const isYetToBePaid = useMemo(() => {
     if (winningQuarters.q1 && !contest.q1Paid) return true;
@@ -82,9 +96,8 @@ export const useBoxIsWinner = ({
     });
   }, [contest, hasWon, winningQuarters.f, winningQuarters.q1, winningQuarters.q2, winningQuarters.q3, owner]);
 
-  if (isAddress(owner) && !isAddressEqual(owner, zeroAddress)) {
-    console.log({ winningQuarters, hasWon, isYetToBePaid, isAbleToBePaid, pendingRewardAmount , boxId: `${col}-${row}`});
-  }
+  console.log({ row, col, homeScore, scoresOnchain, awayScore, winningQuarters, hasWon, isYetToBePaid, isAbleToBePaid, pendingRewardAmount , boxId: `${col}-${row}`});
+
 
   return {
     winningQuarters,

@@ -15,10 +15,6 @@ import { useBoxIsWinner } from "~/hooks/useBoxIsWinner";
 import { type Contest,type ScoresOnChain } from "~/types/contest";
 import { type Game } from "~/types/game";
 
-const cn = (...classes: (string | undefined | null | false)[]) => {
-return classes.filter(Boolean).join(' ');
-};
-
 type Props = {
   boxesAddress: string;
   boxId: number;
@@ -85,7 +81,7 @@ export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnsele
     }
   }, [owner]);
 
-  if (boxIsUnclaimed) {
+  if (boxIsUnclaimed && contest.boxesCanBeClaimed) {
     return (
       <div className="h-full w-full bg-base-300 rounded-lg flex items-center justify-center">
         <input
@@ -105,8 +101,11 @@ export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnsele
   }
 
   return (
-    <div className={cn("h-full w-full bg-base-300 rounded-lg flex items-center justify-center", hasWon && "bg-primary")}>
-      {owner ? (<Avatar className="w-6 h-6" address={owner as Address} />) : boxId}
+    <div className={`h-full w-full rounded-lg flex items-center justify-center relative ${hasWon ? 'bg-gradient-to-b from-primary to-secondary' : 'bg-base-300'}`}>
+      <div className="absolute w-[96%] h-[96%] bg-base-300 rounded-lg" />
+      <div className="flex items-center justify-center text-white">
+        {owner && owner !== CONTEST_CONTRACT[DEFAULT_CHAIN.id] ? (<Avatar className="w-6 h-6" address={owner as Address} />) : null}
+      </div>
     </div>
   )
 }
