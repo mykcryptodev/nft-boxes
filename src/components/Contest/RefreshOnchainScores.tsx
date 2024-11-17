@@ -8,7 +8,7 @@ import { CHAINLINK_GAS_LIMIT, CHAINLINK_JOB_ID, CHAINLINK_SUBSCRIPTION_ID, DEFAU
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
-import { fetchFreshGameScores } from "~/thirdweb/84532/0xb9647d7982cefb104d332ba818b8971d76e7fa1f";
+import { fetchFreshGameScores } from "~/thirdweb/84532/0x7bbc05e8e8eada7845fa106dfd3fc41a159b90f5";
 
 export const RefreshOnchainScores: FC<{ gameId: string }> = ({ gameId }) => {
     const handleOnStatus = useCallback((status: LifecycleStatus) => {
@@ -41,7 +41,7 @@ export const RefreshOnchainScores: FC<{ gameId: string }> = ({ gameId }) => {
   return (
     <>
     <label htmlFor={`refresh-onchain-scores-modal`} className="cursor-pointer">
-      <div className="tooltip tooltip-right" data-tip="Refresh Onchain Scores">      
+      <div className="tooltip tooltip-right" data-tip="Sync Scores Onchain">      
         <ArrowPathIcon className="w-4 h-4 stroke-2" />
       </div>
     </label>
@@ -50,7 +50,7 @@ export const RefreshOnchainScores: FC<{ gameId: string }> = ({ gameId }) => {
       <input type="checkbox" id={`refresh-onchain-scores-modal`} className="modal-toggle" />
       <div className="modal modal-bottom sm:modal-middle" role="dialog">
         <div className="modal-box flex flex-col gap-2 bg-base-100">
-          <h3 className="text-lg font-bold">Refresh Onchain Scores</h3>
+          <h3 className="text-lg font-bold">Sync Scores Onchain</h3>
           <p className="mb-4">Kick off the process to refresh the onchain scores for this game.</p>
             <Transaction
                 className="btn btn-ghost btn-xs btn-circle"
@@ -58,7 +58,7 @@ export const RefreshOnchainScores: FC<{ gameId: string }> = ({ gameId }) => {
                 calls={callsCallback}
                 onStatus={handleOnStatus}
             >
-                <TransactionButton text="Refresh Onchain Scores" />
+                <TransactionButton text="Sync Scores Onchain" />
             </Transaction>
         </div>
         <label className="modal-backdrop" htmlFor={`refresh-onchain-scores-modal`}>Close</label>

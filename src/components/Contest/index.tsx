@@ -6,6 +6,7 @@ import GenerateRandomValues from "~/components/Contest/GenerateRandomValues";
 import Scoreboard from "~/components/Contest/Scoreboard";
 import TeamName from "~/components/Contest/TeamName";
 import useContest from "~/hooks/useContest";
+import useScoresOnchain from "~/hooks/useScoresOnchain";
 import { api } from "~/utils/api";
 
 type GameProps = {
@@ -13,6 +14,7 @@ type GameProps = {
 };
 const Contest: FC<GameProps> = ({ contestId }) => {
   const { data: contest, refetch } = useContest(contestId);
+  const { data: scoresOnchain } = useScoresOnchain(contest);
   const [contestKey, setContestKey] = useState<number>(0);
   const { data: game } = api.game.get.useQuery({
     id: Number(contest?.gameId),
@@ -24,13 +26,14 @@ const Contest: FC<GameProps> = ({ contestId }) => {
   });
   const [selectedBoxIds, setSelectedBoxIds] = useState<number[]>([]);
 
-  if (!game || !contest) {
+  console.log({ contest, game });
+  if (!game || !contest || !scoresOnchain) {
     return null;
   }
 
   return (
     <div key={contestKey}>
-      <Scoreboard contestId={contestId} game={game} />
+      <Scoreboard game={game} scoresOnchain={scoresOnchain} />
       <GenerateRandomValues 
         contest={contest}
         onValuesGenerated={() => {
@@ -86,6 +89,11 @@ const Contest: FC<GameProps> = ({ contestId }) => {
                   onBoxUnselected={(boxId) => {
                     setSelectedBoxIds((prev) => prev.filter((id) => id !== boxId));
                   }}
+                  contest={contest}
+                  game={game}
+                  row={contest.rows[rowNumber - 1] ?? 0} 
+                  col={contest.cols[colNumber - 1] ?? 0} 
+                  scoresOnchain={scoresOnchain}
                 />
               )
             })}

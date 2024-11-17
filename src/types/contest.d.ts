@@ -6,6 +6,9 @@ export type Contest = {
     creator: string;
     boxCost: {
         currency: Address;
+        decimals: number;
+        symbol: string;
+        name: string;
         amount: bigint;
     };
     boxesCanBeClaimed: boolean;
@@ -21,4 +24,22 @@ export type Contest = {
     cols: readonly number[];
     rows: readonly number[];
     boxesAddress: Address;
+    q1Paid: boolean;
+    q2Paid: boolean;
+    q3Paid: boolean;
+    finalPaid: boolean;
 };
+
+export type ScoresOnChain = {
+    awayFLastDigit: number;
+    awayQ1LastDigit: number;
+    awayQ2LastDigit: number;
+    awayQ3LastDigit: number;
+    homeFLastDigit: number;
+    homeQ1LastDigit: number;
+    homeQ2LastDigit: number;
+    homeQ3LastDigit: number;
+    id: bigint;
+    qComplete: number;
+    requestInProgress: boolean;
+  }

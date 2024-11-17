@@ -35,10 +35,17 @@ export function boxClaimedEvent() {
 };
   
 
-
+/**
+ * Represents the filters for the "ContestCreated" event.
+ */
+export type ContestCreatedEventFilters = Partial<{
+  contestId: AbiParameterToPrimitiveType<{"indexed":true,"internalType":"uint256","name":"contestId","type":"uint256"}>
+creator: AbiParameterToPrimitiveType<{"indexed":true,"internalType":"address","name":"creator","type":"address"}>
+}>;
 
 /**
  * Creates an event object for the ContestCreated event.
+ * @param filters - Optional filters to apply to the event.
  * @returns The prepared event object.
  * @example
  * ```
@@ -48,14 +55,18 @@ export function boxClaimedEvent() {
  * const events = await getContractEvents({
  * contract,
  * events: [
- *  contestCreatedEvent()
+ *  contestCreatedEvent({
+ *  contestId: ...,
+ *  creator: ...,
+ * })
  * ],
  * });
  * ```
  */
-export function contestCreatedEvent() {
+export function contestCreatedEvent(filters: ContestCreatedEventFilters = {}) {
   return prepareEvent({
-    signature: "event ContestCreated(uint256 contestId)",
+    signature: "event ContestCreated(uint256 indexed contestId, address indexed creator)",
+    filters,
   });
 };
   
@@ -234,10 +245,16 @@ export function ownershipTransferredEvent(filters: OwnershipTransferredEventFilt
 };
   
 
-
+/**
+ * Represents the filters for the "ScoresAssigned" event.
+ */
+export type ScoresAssignedEventFilters = Partial<{
+  contestId: AbiParameterToPrimitiveType<{"indexed":true,"internalType":"uint256","name":"contestId","type":"uint256"}>
+}>;
 
 /**
  * Creates an event object for the ScoresAssigned event.
+ * @param filters - Optional filters to apply to the event.
  * @returns The prepared event object.
  * @example
  * ```
@@ -247,22 +264,31 @@ export function ownershipTransferredEvent(filters: OwnershipTransferredEventFilt
  * const events = await getContractEvents({
  * contract,
  * events: [
- *  scoresAssignedEvent()
+ *  scoresAssignedEvent({
+ *  contestId: ...,
+ * })
  * ],
  * });
  * ```
  */
-export function scoresAssignedEvent() {
+export function scoresAssignedEvent(filters: ScoresAssignedEventFilters = {}) {
   return prepareEvent({
-    signature: "event ScoresAssigned(uint256 contestId)",
+    signature: "event ScoresAssigned(uint256 indexed contestId)",
+    filters,
   });
 };
   
 
-
+/**
+ * Represents the filters for the "ScoresRequested" event.
+ */
+export type ScoresRequestedEventFilters = Partial<{
+  contestId: AbiParameterToPrimitiveType<{"indexed":true,"internalType":"uint256","name":"contestId","type":"uint256"}>
+}>;
 
 /**
  * Creates an event object for the ScoresRequested event.
+ * @param filters - Optional filters to apply to the event.
  * @returns The prepared event object.
  * @example
  * ```
@@ -272,14 +298,17 @@ export function scoresAssignedEvent() {
  * const events = await getContractEvents({
  * contract,
  * events: [
- *  scoresRequestedEvent()
+ *  scoresRequestedEvent({
+ *  contestId: ...,
+ * })
  * ],
  * });
  * ```
  */
-export function scoresRequestedEvent() {
+export function scoresRequestedEvent(filters: ScoresRequestedEventFilters = {}) {
   return prepareEvent({
-    signature: "event ScoresRequested(uint256 contestId)",
+    signature: "event ScoresRequested(uint256 indexed contestId)",
+    filters,
   });
 };
   
@@ -1007,54 +1036,6 @@ export async function getBalance(
 
 
 /**
- * Represents the parameters for the "getGameIdForContest" function.
- */
-export type GetGameIdForContestParams = {
-  contestId: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"contestId","type":"uint256"}>
-};
-
-/**
- * Calls the "getGameIdForContest" function on the contract.
- * @param options - The options for the getGameIdForContest function.
- * @returns The parsed result of the function call.
- * @example
- * ```
- * import { getGameIdForContest } from "TODO";
- *
- * const result = await getGameIdForContest({
- *  contestId: ...,
- * });
- *
- * ```
- */
-export async function getGameIdForContest(
-  options: BaseTransactionOptions<GetGameIdForContestParams>
-) {
-  return readContract({
-    contract: options.contract,
-    method: [
-  "0xb76bcbd5",
-  [
-    {
-      "internalType": "uint256",
-      "name": "contestId",
-      "type": "uint256"
-    }
-  ],
-  [
-    {
-      "internalType": "uint256",
-      "name": "",
-      "type": "uint256"
-    }
-  ]
-],
-    params: [options.contestId]
-  });
-};
-
-
-/**
  * Represents the parameters for the "getGameScores" function.
  */
 export type GetGameScoresParams = {
@@ -1454,89 +1435,6 @@ export async function isRewardPaidForQuarter(
   ]
 ],
     params: [options.contestId, options.quarter]
-  });
-};
-
-
-/**
- * Represents the parameters for the "isWinner" function.
- */
-export type IsWinnerParams = {
-  rowScore: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"rowScore","type":"uint256"}>
-colScore: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"colScore","type":"uint256"}>
-homeLastDigit: AbiParameterToPrimitiveType<{"internalType":"uint8","name":"homeLastDigit","type":"uint8"}>
-awayLastDigit: AbiParameterToPrimitiveType<{"internalType":"uint8","name":"awayLastDigit","type":"uint8"}>
-qComplete: AbiParameterToPrimitiveType<{"internalType":"uint8","name":"qComplete","type":"uint8"}>
-quarter: AbiParameterToPrimitiveType<{"internalType":"uint8","name":"quarter","type":"uint8"}>
-};
-
-/**
- * Calls the "isWinner" function on the contract.
- * @param options - The options for the isWinner function.
- * @returns The parsed result of the function call.
- * @example
- * ```
- * import { isWinner } from "TODO";
- *
- * const result = await isWinner({
- *  rowScore: ...,
- *  colScore: ...,
- *  homeLastDigit: ...,
- *  awayLastDigit: ...,
- *  qComplete: ...,
- *  quarter: ...,
- * });
- *
- * ```
- */
-export async function isWinner(
-  options: BaseTransactionOptions<IsWinnerParams>
-) {
-  return readContract({
-    contract: options.contract,
-    method: [
-  "0x7f1debe6",
-  [
-    {
-      "internalType": "uint256",
-      "name": "rowScore",
-      "type": "uint256"
-    },
-    {
-      "internalType": "uint256",
-      "name": "colScore",
-      "type": "uint256"
-    },
-    {
-      "internalType": "uint8",
-      "name": "homeLastDigit",
-      "type": "uint8"
-    },
-    {
-      "internalType": "uint8",
-      "name": "awayLastDigit",
-      "type": "uint8"
-    },
-    {
-      "internalType": "uint8",
-      "name": "qComplete",
-      "type": "uint8"
-    },
-    {
-      "internalType": "uint8",
-      "name": "quarter",
-      "type": "uint8"
-    }
-  ],
-  [
-    {
-      "internalType": "bool",
-      "name": "",
-      "type": "bool"
-    }
-  ]
-],
-    params: [options.rowScore, options.colScore, options.homeLastDigit, options.awayLastDigit, options.qComplete, options.quarter]
   });
 };
 

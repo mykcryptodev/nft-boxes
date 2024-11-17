@@ -1,25 +1,16 @@
-import { type FC,useEffect } from "react";
+import { type FC } from "react";
 
 import { RefreshOnchainScores } from "~/components/Contest/RefreshOnchainScores";
 import { EMOJI_TEAM_MAP } from "~/constants";
-import useScoresOnchain from "~/hooks/useScoresOnchain";
+import { type ScoresOnChain } from "~/types/contest";
 import { type Competitor, type Game } from "~/types/game";
 
 type Props = {
   game: Game;
-  contestId: string;
+  scoresOnchain: ScoresOnChain | undefined;
 }
 
-export const Scoreboard: FC<Props> = ({ contestId, game }) => {
-  const { data: scoresOnchain, refetch } = useScoresOnchain(contestId);
-  // refetch every 10 minutes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refetch();
-    }, 1000 * 60 * 10);
-    return () => clearInterval(interval);
-  }, [refetch]);
-
+export const Scoreboard: FC<Props> = ({ game, scoresOnchain }) => {
   const homeTeam = game.competitions[0]?.competitors.find(
     (competitor) => competitor.homeAway === 'home'
   );
@@ -49,7 +40,7 @@ export const Scoreboard: FC<Props> = ({ contestId, game }) => {
   const Quarter: FC<{ number: number, name: string  }> = ({ number, name }) => {
     const isOnchain = (scoresOnchain?.qComplete ?? 0) >= number;
     return (
-      <div className="tooltip cursor-pointer" data-tip={`${isOnchain ? `${name} scores are saved onchain` : `${name} scores are not yet onchain`}`}>
+      <div className="tooltip cursor-pointer" data-tip={`${isOnchain ? `${name} scores are synced onchain` : `${name} scores are not yet onchain`}`}>
         <div className="flex w-full justify-center items-center gap-1">
           <div>{name}</div>
           <div className={`w-2 h-2 rounded-full ${isOnchain ? 'bg-primary' : 'bg-warning'}`} />

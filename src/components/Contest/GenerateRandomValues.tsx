@@ -9,7 +9,7 @@ import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
 import { wagmiConfig } from "~/providers/OnchainProviders";
-import { fetchRandomValues } from "~/thirdweb/84532/0xb9647d7982cefb104d332ba818b8971d76e7fa1f";
+import { fetchRandomValues } from "~/thirdweb/84532/0x7bbc05e8e8eada7845fa106dfd3fc41a159b90f5";
 import { type Contest } from "~/types/contest";
 
 type Props = {
@@ -36,7 +36,7 @@ export const GenerateRandomValues: FC<Props> = ({ contest, onValuesGenerated }) 
           {
             name: 'contestId',
             type: 'uint256',
-            indexed: false
+            indexed: true
           }
         ],
         type: 'event',

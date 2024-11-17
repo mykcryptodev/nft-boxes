@@ -5,31 +5,16 @@ import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
-import useGameIdForContest from "~/hooks/useGameIdForContest";
-import { getGameScores } from "~/thirdweb/84532/0xb9647d7982cefb104d332ba818b8971d76e7fa1f";
+import { getGameScores } from "~/thirdweb/84532/0x7bbc05e8e8eada7845fa106dfd3fc41a159b90f5";
+import { type Contest,type ScoresOnChain } from "~/types/contest";
 
-type ScoresOnChain = {
-  awayFLastDigit: number;
-  awayQ1LastDigit: number;
-  awayQ2LastDigit: number;
-  awayQ3LastDigit: number;
-  homeFLastDigit: number;
-  homeQ1LastDigit: number;
-  homeQ2LastDigit: number;
-  homeQ3LastDigit: number;
-  id: bigint;
-  qComplete: number;
-  requestInProgress: boolean;
-}
-
-const useScoresOnchain = (contestId: string) => {
+const useScoresOnchain = (contest: Contest | undefined) => {
   const [data, setData] = useState<ScoresOnChain | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<unknown>(undefined);
-  const { data: gameId, isLoading: isLoadingGameId, error: gameIdError } = useGameIdForContest(contestId);
 
   const fetchGameScores = useCallback(async () => {
-    if (!gameId) return;
+    if (!contest?.gameId) return;
     
     setIsLoading(true);
     setError(undefined);
@@ -44,7 +29,7 @@ const useScoresOnchain = (contestId: string) => {
     try {
       const gameScores = await getGameScores({
         contract,
-        gameId,
+        gameId:contest.gameId,
       });
       setData(gameScores);
     } catch (error) {
@@ -52,11 +37,11 @@ const useScoresOnchain = (contestId: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [gameId]);
+  }, [contest?.gameId]);
 
   useEffect(() => {
     void fetchGameScores();
-  }, [gameId, fetchGameScores]);
+  }, [fetchGameScores]);
 
   const refetch = () => {
     void fetchGameScores();
@@ -64,8 +49,8 @@ const useScoresOnchain = (contestId: string) => {
 
   return {
     data,
-    isLoading: isLoading || isLoadingGameId,
-    error: error ?? gameIdError,
+    isLoading,
+    error,
     refetch,
   }
 }

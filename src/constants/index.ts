@@ -50,3 +50,10 @@ export const EMOJI_TEAM_MAP: Record<string, string> = {
   ["Vikings"]: "🗡️",
   ["Washington"]: "🏛",
 }
+
+export const PAYOUTS = {
+  "q1": 0.15,
+  "q2": 0.30,
+  "q3": 0.15,
+  "f": 0.38
+}
