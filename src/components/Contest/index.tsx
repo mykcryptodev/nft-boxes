@@ -1,13 +1,14 @@
 import { type FC,useState } from "react";
 
-import Box from "~/components/Contest/Box";
-import { BuyBoxes } from "~/components/Contest/BuyBoxes";
 import GenerateRandomValues from "~/components/Contest/GenerateRandomValues";
 import Scoreboard from "~/components/Contest/Scoreboard";
-import TeamName from "~/components/Contest/TeamName";
 import useContest from "~/hooks/useContest";
 import useScoresOnchain from "~/hooks/useScoresOnchain";
 import { api } from "~/utils/api";
+
+import { Grid } from "./Grid";
+import { Header } from "./Header";
+import { Winners } from "./Winners";
 
 type GameProps = {
   contestId: string;
@@ -26,6 +27,9 @@ const Contest: FC<GameProps> = ({ contestId }) => {
   });
   const [selectedBoxIds, setSelectedBoxIds] = useState<number[]>([]);
 
+  const tabs = [ "Grid", "Winners", "My Boxes" ] as const;
+  const [activeTab, setActiveTab] = useState<string>(tabs[0]);
+
   console.log({ contest, game });
   if (!game || !contest || !scoresOnchain) {
     return null;
@@ -33,84 +37,39 @@ const Contest: FC<GameProps> = ({ contestId }) => {
 
   return (
     <div key={contestKey}>
+      <Header game={game} contest={contest} />
       <Scoreboard game={game} scoresOnchain={scoresOnchain} />
-      <GenerateRandomValues 
-        contest={contest}
-        onValuesGenerated={() => {
-          setSelectedBoxIds([]);
-          setContestKey((prev) => prev + 1);
-          void refetch();
-        }} 
-      />
-      <div className="grid grid-cols-12 mt-2">
-        <div className="grid col-span-1" />
-        <div className="grid col-span-10 place-content-center text-2xl">
-          <TeamName game={game} homeAway="home" />
-        </div>
+      <div role="tablist" className="tabs tabs-boxed my-4 mx-auto max-w-xs">
+        {tabs.map((tab) => (
+          <a 
+            key={tab} 
+            role="tab" 
+            className={`tab ${activeTab === tab ? "tab-active" : ""}`} 
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab}
+          </a>
+        ))}
       </div>
-      <div className="grid grid-cols-12">
-        <div className="grid col-span-1 place-content-center">
-          <div className="transform -rotate-90 text-2xl h-fit">
-            <TeamName game={game} homeAway="away" />
-          </div>
-        </div>
-        <div className="grid col-span-10">
-          <div className="grid grid-cols-11 grid-rows-11 gap-1 w-full h-full">
-            {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
-            {[...Array(121)].map((_, i) => {
-              const rowNumber = Math.floor(i / 11);
-              const colNumber = i % 11;
-              // the box id is based on the position of the box. 
-              // the boxes in the first column and the boxes in the first row do not get IDs
-              // the box in the upper left corner (0, 0) gets an ID of 0
-              const boxId = i % 11 === 0 || i < 11 ? 0 : (rowNumber - 1) * 10 + colNumber - 1;
-
-              if (i % 11 === 0 || i < 11) {
-                if (contest.randomValuesSet) {
-                  return (
-                    <div key={i} className={`border-2 rounded-lg w-full h-full aspect-square grid place-content-center bg-base-200`}>
-                      {(i === 0) ? '' : (rowNumber === 0) ? contest.cols[colNumber - 1] : (colNumber === 0) ? contest.rows[rowNumber - 1] : ''}
-                    </div>
-                  )
-                }
-                return (
-                  <div key={i} className={`border-2 rounded-lg w-full h-full aspect-square grid place-content-center bg-base-200`} />
-                )
-              }
-              return (
-                <Box
-                  key={i} 
-                  boxId={boxId + (Number(contestId) * 100)}
-                  boxesAddress={contest.boxesAddress}
-                  selectedBoxIds={selectedBoxIds}
-                  onBoxSelected={(boxId) => {
-                    setSelectedBoxIds((prev) => [...prev, boxId]);
-                  }}
-                  onBoxUnselected={(boxId) => {
-                    setSelectedBoxIds((prev) => prev.filter((id) => id !== boxId));
-                  }}
-                  contest={contest}
-                  game={game}
-                  row={rowNumber}
-                  col={colNumber} 
-                  scoresOnchain={scoresOnchain}
-                />
-              )
-            })}
-          </div>
-        </div>
+      <div className={`${activeTab === "Grid" ? "block" : "hidden"}`}>
+        <Grid 
+          game={game} 
+          contest={contest} 
+          scoresOnchain={scoresOnchain} 
+          selectedBoxIds={selectedBoxIds} 
+          setSelectedBoxIds={setSelectedBoxIds} 
+          contestKey={contestKey}
+          setContestKey={setContestKey}
+          refetch={refetch} 
+        />
       </div>
-      <BuyBoxes 
-        key={contestKey}
-        contest={contest}
-        selectedBoxes={selectedBoxIds} 
-        setSelectedBoxes={setSelectedBoxIds} 
-        onBoxBuySuccess={() => {
-          setSelectedBoxIds([]);
-          setContestKey((prev) => prev + 1);
-          void refetch();
-        }}
-      />
+      <div className={`${activeTab === "Winners" ? "block" : "hidden"}`}>
+        <Winners 
+          game={game} 
+          contest={contest} 
+          scoresOnchain={scoresOnchain} 
+        />
+      </div>
     </div>
   );
 };

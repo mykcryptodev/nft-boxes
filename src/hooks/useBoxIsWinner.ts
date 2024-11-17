@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { toUnits } from "thirdweb";
 import { isAddress, isAddressEqual,zeroAddress } from "viem";
+import { type Address } from "viem";
 
 import { PAYOUTS } from "~/constants";
 import { type Contest, type ScoresOnChain } from "~/types/contest";
@@ -12,7 +13,7 @@ type Props = {
   contest: Contest;
   game: Game;
   scoresOnchain: ScoresOnChain;
-  owner: string;
+  owner: Address | null;
 }
 export const useBoxIsWinner = ({
   col, row, contest, game, scoresOnchain, owner
@@ -89,7 +90,7 @@ export const useBoxIsWinner = ({
     if (winningQuarters.f && !contest.finalPaid) {
       pendingRewardAmount += totalAmountInContest * PAYOUTS.f;
     }
-    if (isAddress(owner) && !isAddressEqual(owner, zeroAddress)) return pendingRewardAmount / 2;
+    if (owner && isAddress(owner) && !isAddressEqual(owner, zeroAddress)) return pendingRewardAmount / 2;
     return pendingRewardAmount.toLocaleString([], {
       minimumFractionDigits: 2,
       maximumFractionDigits: 6,

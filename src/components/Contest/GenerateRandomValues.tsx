@@ -94,7 +94,7 @@ export const GenerateRandomValues: FC<Props> = ({ contest, onValuesGenerated }) 
 
   return (
     <>
-      <button className="btn btn-block" onClick={()=> {
+      <button className="btn btn-block my-2" onClick={()=> {
         const modal = document?.getElementById('random_generator_modal') as HTMLDialogElement;
         modal.showModal();
       }}>

@@ -8,6 +8,21 @@ export interface Game {
     season: Season;
     week: Week;
     competitions: Competition[];
+    status: Status;
+}
+
+interface Status {
+    displayClock: string;
+    period: number;
+    type: StatusType;
+}
+
+interface StatusType {
+    completed: boolean;
+    description: string;
+    detail: string;
+    id: string;
+    name: string;
 }
 
 interface Season {

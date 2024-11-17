@@ -1,17 +1,12 @@
 import { Avatar } from "@coinbase/onchainkit/identity";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { type FC } from "react";
-import { createThirdwebClient, getContract } from "thirdweb";
-import { ownerOf } from "thirdweb/extensions/erc721";
-import { getSocialProfiles } from "thirdweb/social";
-import { type Address } from "viem";
 import { isAddress, isAddressEqual } from "viem";
 
 import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
-import { env } from "~/env";
-import { getThirdwebChain } from "~/helpers/getThirdwebChain";
 import { useBoxIsWinner } from "~/hooks/useBoxIsWinner";
+import { useBoxOwner } from "~/hooks/useBoxOwner";
 import { type Contest,type ScoresOnChain } from "~/types/contest";
 import { type Game } from "~/types/game";
 
@@ -29,7 +24,7 @@ type Props = {
 }
 
 export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnselected, selectedBoxIds, contest, game, row, col, scoresOnchain }) => {
-  const [owner, setOwner] = useState<string>("");
+  const { owner, isLoading: isOwnerLoading } = useBoxOwner(boxesAddress, boxId);
   const { winningQuarters, hasWon, isYetToBePaid, isAbleToBePaid, pendingRewardAmount } = useBoxIsWinner({
     col,
     row,
@@ -40,46 +35,14 @@ export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnsele
   });
 
   const boxIsUnclaimed = useMemo(() => {
-    return isAddress(owner) && isAddressEqual(owner, CONTEST_CONTRACT[DEFAULT_CHAIN.id]!);
+    return owner && isAddress(owner) && isAddressEqual(owner, CONTEST_CONTRACT[DEFAULT_CHAIN.id]!);
   }, [owner]);
 
-  useEffect(() => {
-    const getOwner = async () => {
-      const client = createThirdwebClient({
-        clientId: env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
-      });
-
-      const contract = getContract({
-        client,
-        address: boxesAddress,
-        chain: getThirdwebChain(DEFAULT_CHAIN),
-      });
-      const result = await ownerOf({
-        contract,
-        tokenId: BigInt(boxId),
-      });
-      setOwner(result);
-    }
-    void getOwner();
-  }, [boxesAddress, boxId]);
-
-  useEffect(() => {
-    if (isAddress(owner)) {
-      const fetchProfiles = async () => {
-        const client = createThirdwebClient({
-          clientId: env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
-        });
-        const profiles = await getSocialProfiles({
-          address: owner,
-          client,
-        });
-        if (profiles.length > 0) {
-          console.log({ profiles });
-        }
-      }
-      void fetchProfiles();
-    }
-  }, [owner]);
+  if (isOwnerLoading) {
+    return (
+      <div className="skeleton h-full w-full rounded-lg bg-base-300"></div>
+    )
+  }
 
   if (boxIsUnclaimed && contest.boxesCanBeClaimed) {
     return (
@@ -101,10 +64,11 @@ export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnsele
   }
 
   return (
-    <div className={`h-full w-full rounded-lg flex items-center justify-center relative ${hasWon ? 'bg-gradient-to-b from-primary to-secondary' : 'bg-base-300'}`}>
-      <div className="absolute w-[96%] h-[96%] bg-base-300 rounded-lg" />
-      <div className="flex items-center justify-center text-white">
-        {owner && owner !== CONTEST_CONTRACT[DEFAULT_CHAIN.id] ? (<Avatar className="w-6 h-6" address={owner as Address} />) : null}
+    <div className={`h-full w-full rounded-lg flex items-center justify-center relative p-px ${hasWon ? 'bg-gradient-to-b from-primary to-secondary' : 'bg-base-300'}`}>
+      <div className="bg-base-300 h-full w-full flex items-center justify-center rounded-[calc(0.5rem-1px)]">
+        <div className="flex items-center justify-center">
+          {owner && owner !== CONTEST_CONTRACT[DEFAULT_CHAIN.id] ? (<Avatar className="w-6 h-6" address={owner} />) : null}
+        </div>
       </div>
     </div>
   )
