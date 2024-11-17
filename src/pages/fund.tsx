@@ -1,10 +1,11 @@
 import { FundButton } from "@coinbase/onchainkit/fund";
 import { SwapDefault } from "@coinbase/onchainkit/swap";
-import { GetServerSideProps, type NextPage } from "next";
-import { DEFAULT_TOKENS } from "~/constants/tokens";
-import { base } from "viem/chains";
-import Link from "next/link";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { type GetServerSideProps, type NextPage } from "next";
+import Link from "next/link";
+import { base } from "viem/chains";
+
+import { DEFAULT_TOKENS } from "~/constants/tokens";
 
 type Props = {
   address: `0x${string}`;

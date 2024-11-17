@@ -25,7 +25,7 @@ type Props = {
 
 export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnselected, selectedBoxIds, contest, game, row, col, scoresOnchain }) => {
   const { owner, isLoading: isOwnerLoading } = useBoxOwner(boxesAddress, boxId);
-  const { winningQuarters, hasWon, isYetToBePaid, isAbleToBePaid, pendingRewardAmount } = useBoxIsWinner({
+  const { hasWon } = useBoxIsWinner({
     col,
     row,
     contest,

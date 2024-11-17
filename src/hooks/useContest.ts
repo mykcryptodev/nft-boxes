@@ -121,7 +121,7 @@ const useContest = (contestId: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [contestId]);
+  }, [contestId, getTokenImage]);
 
   useEffect(() => {
     void fetchContest();

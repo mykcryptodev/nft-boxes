@@ -5,8 +5,8 @@ import { type Game } from "~/types/game";
 
 import Box from "./Box";
 import { BuyBoxes } from "./BuyBoxes";
-import { TeamName } from "./TeamName";
 import GenerateRandomValues from "./GenerateRandomValues";
+import { TeamName } from "./TeamName";
 
 type Props = {
   game: Game;

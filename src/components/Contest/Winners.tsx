@@ -1,5 +1,6 @@
 import { Avatar, Name } from "@coinbase/onchainkit/identity";
 import { type FC } from "react";
+import { toTokens } from "thirdweb";
 
 import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
@@ -8,7 +9,6 @@ import { type Contest,type ScoresOnChain } from "~/types/contest";
 import { type Game } from "~/types/game";
 
 import { ClaimReward } from "./ClaimReward";
-import { toTokens } from "thirdweb";
 
 type Props = {
   game: Game;

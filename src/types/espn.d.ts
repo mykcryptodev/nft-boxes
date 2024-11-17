@@ -60,11 +60,11 @@ type SeasonEvent = {
     recent: boolean;
     venue: Venue;
     competitors: Competitor[];
-    format: any; // This can be expanded based on the details of the 'format' object
-    tickets: any[]; // This can be expanded based on the details of the 'tickets' object
+    format: unknown[]; // This can be expanded based on the details of the 'format' object
+    tickets: unknown[]; // This can be expanded based on the details of the 'tickets' object
     startDate: string;
-    geoBroadcasts: any[]; // This can be expanded based on the details of the 'geoBroadcasts' object
-    odds: any[]; // This can be expanded based on the details of the 'odds' object
+    geoBroadcasts: unknown[]; // This can be expanded based on the details of the 'geoBroadcasts' object
+    odds: unknown[]; // This can be expanded based on the details of the 'odds' object
   };
   
   type Weather = {

@@ -1,5 +1,5 @@
-import { gameRouter } from "~/server/api/routers/game";
 import { coingeckoRouter } from "~/server/api/routers/coingecko";
+import { gameRouter } from "~/server/api/routers/game";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**

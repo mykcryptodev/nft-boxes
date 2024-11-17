@@ -2,6 +2,7 @@ import { type FC,useEffect,useMemo, useState } from "react";
 
 import { type Contest } from "~/types/contest";
 import { type Game } from "~/types/game";
+
 import { Price } from "./Price";
 
 type Props = {  

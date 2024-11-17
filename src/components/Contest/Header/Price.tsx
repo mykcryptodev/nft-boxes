@@ -1,13 +1,15 @@
+import { FundButton } from "@coinbase/onchainkit/fund";
 import { SwapDefault } from "@coinbase/onchainkit/swap";
+import Image from "next/image";
+import Link from "next/link";
 import { type FC } from "react";
 import { toTokens } from "thirdweb";
+import { isAddressEqual, zeroAddress } from "viem";
+import { base } from "viem/chains";
+import { useAccount,useBalance } from 'wagmi';
+
 import { DEFAULT_TOKENS } from "~/constants/tokens";
 import { type Contest } from "~/types/contest";
-import { base } from "viem/chains";
-import { FundButton } from "@coinbase/onchainkit/fund";
-import Link from "next/link";
-import { useBalance, useAccount } from 'wagmi';
-import { isAddressEqual, zeroAddress } from "viem";
 
 type Props = {
   contest: Contest;
@@ -41,7 +43,7 @@ export const Price: FC<Props> = ({ contest, onSwapToggle }) => {
             <div className="stat-figure text-secondary">
               <div className="avatar">
                 <div className="w-16 rounded-full">
-                  <img src={contest.boxCost.image} />
+                  <Image src={contest.boxCost.image} width={64} height={64} alt={contest.boxCost.name} />
                 </div>
               </div>
             </div>
@@ -72,7 +74,7 @@ export const Price: FC<Props> = ({ contest, onSwapToggle }) => {
             <div className="stat-figure text-secondary">
               <div className="avatar">
                 <div className="w-16 rounded-full">
-                  <img src={contest.boxCost.image} />
+                  <Image src={contest.boxCost.image} width={64} height={64} alt={contest.boxCost.name} />
                 </div>
               </div>
             </div>
