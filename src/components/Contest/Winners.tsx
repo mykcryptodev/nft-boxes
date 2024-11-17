@@ -6,16 +6,14 @@ import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { useBoxOwner } from "~/hooks/useBoxOwner";
 import { type Contest,type ScoresOnChain } from "~/types/contest";
-import { type Game } from "~/types/game";
 
 import { ClaimReward } from "./ClaimReward";
 
 type Props = {
-  game: Game;
   contest: Contest;
   scoresOnchain: ScoresOnChain;
 }
-export const Winners: FC<Props> = ({ game, contest, scoresOnchain }) => {
+export const Winners: FC<Props> = ({ contest, scoresOnchain }) => {
   console.log({ scoresOnchain, contest})
   // Helper function to get winning box for a quarter
   const getQuarterWinningTokenId = (quarterIndex: number) => {

@@ -74,7 +74,6 @@ const Contest: FC<GameProps> = ({ contestId }) => {
       </div>
       <div className={`${activeTab === "Winners" && !swapIsOpen ? "block" : "hidden"}`}>
         <Winners 
-          game={game} 
           contest={contest} 
           scoresOnchain={scoresOnchain} 
         />
