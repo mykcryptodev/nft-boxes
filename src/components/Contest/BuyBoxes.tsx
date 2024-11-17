@@ -1,9 +1,10 @@
 import { FundButton } from '@coinbase/onchainkit/fund';
 import { type LifecycleStatus, Transaction, TransactionButton, TransactionToast, TransactionToastAction, TransactionToastIcon, TransactionToastLabel } from '@coinbase/onchainkit/transaction';
 import { CheckIcon,DocumentDuplicateIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { type FC,useCallback,useEffect, useState } from "react";
+import { type FC,useCallback,useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { createThirdwebClient, encode, getContract } from 'thirdweb';
+import { createThirdwebClient, encode, getContract, toTokens } from 'thirdweb';
+import { approve } from 'thirdweb/extensions/erc20';
 import { getWalletBalance } from "thirdweb/wallets";
 import { isAddressEqual, zeroAddress } from 'viem';
 import { useAccount } from "wagmi";
@@ -32,6 +33,11 @@ export const BuyBoxes: FC<Props> = ({ contest, selectedBoxes, setSelectedBoxes, 
         }
     }, [onBoxBuySuccess]);
 
+    const totalAmount = useMemo(() => toTokens(
+      contest.boxCost.amount * BigInt(selectedBoxes.length),
+      contest.boxCost.decimals
+    ), [contest.boxCost.amount, contest.boxCost.decimals, selectedBoxes.length]);
+
     const callsCallback = useCallback(async () => {
         if (!address) return [];
         const client = createThirdwebClient({
@@ -47,12 +53,31 @@ export const BuyBoxes: FC<Props> = ({ contest, selectedBoxes, setSelectedBoxes, 
             player: address,
             tokenIds: selectedBoxes.map(BigInt),
         });
-        return [{
+        const buyCall = {
             to: CONTEST_CONTRACT[DEFAULT_CHAIN.id]!,
             data: await encode(data),
             value: isAddressEqual(contest.boxCost.currency, zeroAddress) ? contest.boxCost.amount * BigInt(selectedBoxes.length) : 0n,
-        }];
-    }, [address, contest.boxCost.amount, contest.boxCost.currency, selectedBoxes]);
+        };
+        if (isAddressEqual(contest.boxCost.currency, zeroAddress)) {
+            return [buyCall];
+        }
+        const tokenContract = getContract({
+            address: contest.boxCost.currency,
+            client,
+            chain: getThirdwebChain(DEFAULT_CHAIN),
+        });
+        const allowance = approve({
+            contract: tokenContract,
+            spender: CONTEST_CONTRACT[DEFAULT_CHAIN.id]!,
+            amount: totalAmount,
+        });
+        const allowanceCall = {
+            to: contest.boxCost.currency,
+            data: await encode(allowance),
+            value: 0n,
+        };
+        return [allowanceCall, buyCall];
+    }, [address, contest.boxCost.amount, contest.boxCost.currency, selectedBoxes, totalAmount]);
 
     useEffect(() => {
         const fetchBalance = async () => {
@@ -158,7 +183,7 @@ export const BuyBoxes: FC<Props> = ({ contest, selectedBoxes, setSelectedBoxes, 
                     calls={callsCallback}
                     onStatus={handleOnStatus}
                 >
-                    <TransactionButton text={`Buy ${selectedBoxes.length} Boxes`} />
+                    <TransactionButton text={`Buy ${selectedBoxes.length} Boxes (${totalAmount} ${contest.boxCost.symbol})`} />
                     <TransactionToast position="top-center">
                         <TransactionToastIcon />
                         <TransactionToastLabel />
