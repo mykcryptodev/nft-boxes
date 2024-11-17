@@ -4,6 +4,7 @@ import {Contests} from "./Contests.sol";
 import {Boxes} from "./Boxes.sol";
 import {IContestTypes} from "./IContestTypes.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 contract ContestsReader is Ownable {
     Contests public contestStorage;
@@ -63,8 +64,43 @@ contract ContestsReader is Ownable {
         }
     }
 
+    /**
+        Get the currency of the contest
+     */
+    function getContestCurrency(uint256 contestId) external view returns (address, uint256, string memory, string memory, uint256) {
+        (,,,IContestTypes.Cost memory boxCost,,,,,) = contestStorage.contests(contestId);
+        if (boxCost.currency == address(0)) {
+            return (address(0), 18, "ETH", "Ether", boxCost.amount);
+        }
+        IERC20Metadata token = IERC20Metadata(boxCost.currency);
+        return (
+            boxCost.currency,
+            token.decimals(),
+            token.symbol(),
+            token.name(),
+            boxCost.amount
+        );
+    }
 
-    function calculateWinningQuarters(uint256 rowScore, uint256 colScore, IContestTypes.GameScore memory gameScores) public view returns (uint8[] memory) {
+    function isWinner(uint256 rowScore, uint256 colScore, uint8 homeLastDigit, uint8 awayLastDigit, uint8 qComplete, uint8 quarter) public pure returns (bool) {
+        if (quarter == 1) {
+            return qComplete >= 1 && awayLastDigit == rowScore && homeLastDigit == colScore;
+        } else if (quarter == 2) {
+            return qComplete >= 2 && awayLastDigit == rowScore && homeLastDigit == colScore;
+        } else if (quarter == 3) {
+            return qComplete >= 3 && awayLastDigit == rowScore && homeLastDigit == colScore;
+        } else if (quarter == 4) {
+            return qComplete > 99 && awayLastDigit == rowScore && homeLastDigit == colScore;
+        }
+        return false;
+    }
+
+    function getGameIdForContest (uint256 contestId) public view returns (uint256) {
+        (, uint256 gameId,,,,,,,) = contestStorage.contests(contestId);
+        return gameId;
+    }
+
+    function calculateWinningQuarters(uint256 rowScore, uint256 colScore, IContestTypes.GameScore memory gameScores) public pure returns (uint8[] memory) {
         uint8[] memory winningQuarters = new uint8[](4);
         uint8 winCount = 0;
 
@@ -76,8 +112,8 @@ contract ContestsReader is Ownable {
         return trimWinningQuarters(winningQuarters, winCount);
     }
 
-    function checkQuarter(uint8[] memory winningQuarters, uint8 winCount, uint256 rowScore, uint256 colScore, uint8 awayLastDigit, uint8 homeLastDigit, uint8 qComplete, uint8 quarter) internal view returns (uint8) {
-        if (contestStorage.isWinner(rowScore, colScore, homeLastDigit, awayLastDigit, qComplete, quarter)) {
+    function checkQuarter(uint8[] memory winningQuarters, uint8 winCount, uint256 rowScore, uint256 colScore, uint8 awayLastDigit, uint8 homeLastDigit, uint8 qComplete, uint8 quarter) internal pure returns (uint8) {
+        if (isWinner(rowScore, colScore, homeLastDigit, awayLastDigit, qComplete, quarter)) {
             winningQuarters[winCount] = quarter;
             return winCount + 1;
         }

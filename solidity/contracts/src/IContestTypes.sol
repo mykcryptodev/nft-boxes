@@ -42,4 +42,9 @@ interface IContestTypes {
         bool q3Paid;
         bool finalPaid;
     }
+
+    struct BoxCost {
+        address currency;
+        uint256 amount;
+    }
 }

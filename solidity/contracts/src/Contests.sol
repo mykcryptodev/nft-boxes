@@ -457,19 +457,6 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         return (rowScore, colScore);
     }
 
-    function isWinner(uint256 rowScore, uint256 colScore, uint8 homeLastDigit, uint8 awayLastDigit, uint8 qComplete, uint8 quarter) public pure returns (bool) {
-        if (quarter == 1) {
-            return qComplete >= 1 && awayLastDigit == rowScore && homeLastDigit == colScore;
-        } else if (quarter == 2) {
-            return qComplete >= 2 && awayLastDigit == rowScore && homeLastDigit == colScore;
-        } else if (quarter == 3) {
-            return qComplete >= 3 && awayLastDigit == rowScore && homeLastDigit == colScore;
-        } else if (quarter == 4) {
-            return qComplete > 99 && awayLastDigit == rowScore && homeLastDigit == colScore;
-        }
-        return false;
-    }
-
     function isRewardPaidForQuarter(uint256 contestId, uint8 quarter) public view returns (bool) {
         IContestTypes.Contest memory contest = contests[contestId];
 
@@ -488,10 +475,6 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         return 0;
     }
     
-    function getGameIdForContest (uint256 contestId) public view returns (uint256) {
-        return contests[contestId].gameId;
-    }
-
     /**
         Read the scores of the cols of a contest
      */

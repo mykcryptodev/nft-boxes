@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import {Contests} from "./Contests.sol";
+import {ContestsReader} from "./ContestsReader.sol";
 import {IContestTypes} from "./IContestTypes.sol";
 
 contract Boxes is ERC721, ERC721Enumerable, Ownable {
@@ -84,7 +85,8 @@ contract Boxes is ERC721, ERC721Enumerable, Ownable {
     }
 
     function _checkWinningStatus(uint256 contestId, uint256 tokenId) private view returns (bool isWinner, bool hasUnclaimedRewards) {
-        IContestTypes.GameScore memory scores = contests.getGameScores(contests.getGameIdForContest(contestId));
+        ContestsReader contestsReader = contests.contestsReader();
+        IContestTypes.GameScore memory scores = contests.getGameScores(contestsReader.getGameIdForContest(contestId));
         (uint256 rowScore, uint256 colScore) = contests.fetchBoxScores(contestId, tokenId);
         
         uint8[] memory winningQuarters = contests.getWinningQuarters(
