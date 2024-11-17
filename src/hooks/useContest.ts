@@ -9,11 +9,14 @@ import { getThirdwebChain } from "~/helpers/getThirdwebChain";
 import { boxes, contests, fetchContestCols, fetchContestRows,isRewardPaidForQuarter } from "~/thirdweb/84532/0x7bbc05e8e8eada7845fa106dfd3fc41a159b90f5";
 import { getContestCurrency } from "~/thirdweb/84532/0x534dc0b2ac842d411d1e15c6b794c1ecea9170c7";
 import { type Contest } from "~/types/contest";
+import { api } from "~/utils/api";
 
 const useContest = (contestId: string) => {
   const [data, setData] = useState<Contest | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<unknown>(undefined);
+
+  const { mutateAsync: getTokenImage } = api.coingecko.getTokenImage.useMutation();
 
   const fetchContest = useCallback(async () => {
     setIsLoading(true);
@@ -84,6 +87,10 @@ const useContest = (contestId: string) => {
         })
       ]);
       console.log({currency});
+      const tokenImage = await getTokenImage({
+        chainId: DEFAULT_CHAIN.id,
+        tokenAddress: currency[0],
+      });
       setData({
         id: contest[0],
         gameId: contest[1],
@@ -94,6 +101,7 @@ const useContest = (contestId: string) => {
           decimals: Number(currency[1]),
           symbol: currency[2],
           name: currency[3],
+          image: tokenImage,
         },
         boxesCanBeClaimed: contest[4],
         rewardsPaid: contest[5],

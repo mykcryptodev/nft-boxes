@@ -54,7 +54,7 @@ export const Winners: FC<Props> = ({ game, contest, scoresOnchain }) => {
         {owner && owner !== CONTEST_CONTRACT[DEFAULT_CHAIN.id] ? (
           <div className="flex flex-col gap-1 items-center justify-center">
             <Avatar className="w-12 h-12" address={owner} />
-            <Name address={owner} />
+            <Name address={owner} className="text-base-content" />
             <ClaimReward 
               contest={contest} 
               tokenId={tokenId} 

@@ -40,7 +40,7 @@ export const Scoreboard: FC<Props> = ({ game, scoresOnchain }) => {
   const Quarter: FC<{ number: number, name: string  }> = ({ number, name }) => {
     const isOnchain = (scoresOnchain?.qComplete ?? 0) >= number;
     return (
-      <div className="tooltip cursor-pointer" data-tip={`${isOnchain ? `${name} scores are synced onchain` : `${name} scores are not yet onchain`}`}>
+      <div className={`tooltip tooltip-${number < 3 ? 'top' : 'left'} sm:tooltip-top cursor-pointer`} data-tip={`${isOnchain ? `${name} scores are synced onchain` : `${name} scores are not yet onchain`}`}>
         <div className="flex w-full justify-center items-center gap-1">
           <div>{name}</div>
           <div className={`w-2 h-2 rounded-full ${isOnchain ? 'bg-primary' : 'bg-warning'}`} />
@@ -60,43 +60,67 @@ export const Scoreboard: FC<Props> = ({ game, scoresOnchain }) => {
   };
 
   return (
-    <div className="bg-base-200 flex flex-col gap-2 p-4 rounded-lg text-center">
-      <div className="grid grid-cols-5 gap-2 border-b-2">
-        <div>
+    <div className="bg-base-200 grid grid-flow-row gap-2 p-4 rounded-lg text-center">
+      <div className="grid grid-cols-12 gap-2 border-b-2">
+        <div className="col-span-4 grid">
           <RefreshOnchainScores gameId={game.id} />
         </div>
-        <Quarter number={1} name={"Q1"} />
-        <Quarter number={2} name={"Q2"} />
-        <Quarter number={3} name={"Q3"} />
-        <Quarter number={4} name={"Final"} />
+        <div className="col-span-2">
+          <Quarter number={1} name={"Q1"} />
+        </div>
+        <div className="col-span-2">
+          <Quarter number={2} name={"Q2"} />
+        </div>
+        <div className="col-span-2">
+          <Quarter number={3} name={"Q3"} />
+        </div>
+        <div className="col-span-2">
+          <Quarter number={4} name={"Final"} />
+        </div>
       </div>
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-12 gap-2">
         {homeTeam ? (
-          <div className="w-full text-center gap-2 overflow-hidden overflow-ellipsis whitespace-nowrap">
+          <div className="w-full col-span-4 text-center gap-2 overflow-hidden overflow-ellipsis whitespace-nowrap">
             {EMOJI_TEAM_MAP[homeTeam.team.name] ?? '🏈'}&nbsp;
             {homeTeam.team.abbreviation}
           </div>
         ) : (
-          <div>Home</div>
+          <div className="col-span-4">Home</div>
         )}
-        <Score quarter={1} team={homeTeam} />
-        <Score quarter={2} team={homeTeam} />
-        <Score quarter={3} team={homeTeam} />
-        <Score quarter={4} team={homeTeam} />
+        <div className="col-span-2">
+          <Score quarter={1} team={homeTeam} />
+        </div>
+        <div className="col-span-2">
+          <Score quarter={2} team={homeTeam} />
+        </div>
+        <div className="col-span-2">
+          <Score quarter={3} team={homeTeam} />
+        </div>
+        <div className="col-span-2">
+          <Score quarter={4} team={homeTeam} />
+        </div>
       </div>
-      <div className={`grid grid-cols-5 gap-2`}>
+      <div className={`grid grid-cols-12 gap-2`}>
         {awayTeam ? (
-          <div className="w-full text-center gap-2 overflow-hidden overflow-ellipsis whitespace-nowrap">
+          <div className="w-full text-center col-span-4 gap-2 overflow-hidden overflow-ellipsis whitespace-nowrap">
             {EMOJI_TEAM_MAP[awayTeam.team.name] ?? '🏈'}&nbsp;
             {awayTeam.team.abbreviation}
           </div>
         ) : (
-          <div>Away</div>
+          <div className="col-span-4">Away</div>
         )}
-        <Score quarter={1} team={awayTeam} />
-        <Score quarter={2} team={awayTeam} />
-        <Score quarter={3} team={awayTeam} />
-        <Score quarter={4} team={awayTeam} />
+        <div className="col-span-2">
+          <Score quarter={1} team={awayTeam} />
+        </div>
+        <div className="col-span-2">
+          <Score quarter={2} team={awayTeam} />
+        </div>
+        <div className="col-span-2">
+          <Score quarter={3} team={awayTeam} />
+        </div>
+        <div className="col-span-2">
+          <Score quarter={4} team={awayTeam} />
+        </div>
       </div>
     </div>
   )

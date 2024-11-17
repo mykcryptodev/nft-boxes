@@ -10,6 +10,7 @@ export type Contest = {
         symbol: string;
         name: string;
         amount: bigint;
+        image: string;
     };
     boxesCanBeClaimed: boolean;
     rewardsPaid: {

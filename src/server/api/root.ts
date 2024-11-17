@@ -1,4 +1,5 @@
 import { gameRouter } from "~/server/api/routers/game";
+import { coingeckoRouter } from "~/server/api/routers/coingecko";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -8,6 +9,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   game: gameRouter,
+  coingecko: coingeckoRouter,
 });
 
 // export type definition of API

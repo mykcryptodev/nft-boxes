@@ -16,9 +16,7 @@ type Props = {
 }
 const ContestPage: NextPage<Props> = ({ contestId }) => {
   return (
-    <div>
-      <Contest contestId={contestId} />
-    </div>
+    <Contest contestId={contestId} />
   )
 }
 

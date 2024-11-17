@@ -1,6 +1,5 @@
 import { type FC,useState } from "react";
 
-import GenerateRandomValues from "~/components/Contest/GenerateRandomValues";
 import Scoreboard from "~/components/Contest/Scoreboard";
 import useContest from "~/hooks/useContest";
 import useScoresOnchain from "~/hooks/useScoresOnchain";
@@ -27,8 +26,9 @@ const Contest: FC<GameProps> = ({ contestId }) => {
   });
   const [selectedBoxIds, setSelectedBoxIds] = useState<number[]>([]);
 
-  const tabs = [ "Grid", "Winners", "My Boxes" ] as const;
+  const tabs = [ "Grid", "Winners", "My Boxes"] as const;
   const [activeTab, setActiveTab] = useState<string>(tabs[0]);
+  const [swapIsOpen, setSwapIsOpen] = useState<boolean>(false);
 
   console.log({ contest, game });
   if (!game || !contest || !scoresOnchain) {
@@ -36,22 +36,31 @@ const Contest: FC<GameProps> = ({ contestId }) => {
   }
 
   return (
-    <div key={contestKey}>
-      <Header game={game} contest={contest} />
-      <Scoreboard game={game} scoresOnchain={scoresOnchain} />
-      <div role="tablist" className="tabs tabs-boxed my-4 mx-auto max-w-xs">
-        {tabs.map((tab) => (
-          <a 
-            key={tab} 
-            role="tab" 
-            className={`tab ${activeTab === tab ? "tab-active" : ""}`} 
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
-          </a>
-        ))}
-      </div>
-      <div className={`${activeTab === "Grid" ? "block" : "hidden"}`}>
+    <div className="w-full" key={contestKey}>
+      <Header 
+        game={game} 
+        contest={contest} 
+        onSwapToggle={(isOpen: boolean) => setSwapIsOpen(isOpen)}
+      />
+
+      {!swapIsOpen && (
+        <>
+          <Scoreboard game={game} scoresOnchain={scoresOnchain} />
+          <div role="tablist" className={`tabs tabs-boxed my-4 mx-auto max-w-xs ${activeTab === "Swap" ? "hidden" : ""}`}>
+            {tabs.map((tab) => (
+              <a 
+                key={tab} 
+                role="tab" 
+                className={`tab ${activeTab === tab ? "tab-active" : ""}`} 
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </a>
+            ))}
+          </div>
+        </>
+      )}
+      <div className={`${activeTab === "Grid" && !swapIsOpen ? "block" : "hidden"}`}>
         <Grid 
           game={game} 
           contest={contest} 
@@ -63,7 +72,7 @@ const Contest: FC<GameProps> = ({ contestId }) => {
           refetch={refetch} 
         />
       </div>
-      <div className={`${activeTab === "Winners" ? "block" : "hidden"}`}>
+      <div className={`${activeTab === "Winners" && !swapIsOpen ? "block" : "hidden"}`}>
         <Winners 
           game={game} 
           contest={contest} 

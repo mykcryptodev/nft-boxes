@@ -56,4 +56,6 @@ export const PAYOUTS = {
   "q2": 0.30,
   "q3": 0.15,
   "f": 0.38
-}
+};
+
+export const COINGECKO_UNKNOWN_IMG = 'https://static.coingecko.com/s/missing_thumb_2x-38c6e63b2e37f3b16510adf55368db6d8d8e6385629f6e9d41557762b25a6eeb.png';
