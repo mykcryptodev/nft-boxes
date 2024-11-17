@@ -51,7 +51,7 @@ export const Price: FC<Props> = ({ contest, onSwapToggle }) => {
               {toTokens(contest.totalRewards, contest.boxCost.decimals)} {contest.boxCost.symbol}
             </div>
             <div className="stat-actions">
-              <label htmlFor="swap-drawer" className="drawer-button btn btn-sm">
+              <label htmlFor="swap-drawer" className="drawer-button btn btn-sm hidden sm:flex w-fit">
                 Get {contest.boxCost.symbol}
               </label>
               <Link href={`/fund?${queryParams}`} className="btn btn-sm sm:hidden">

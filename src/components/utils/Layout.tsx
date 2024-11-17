@@ -1,12 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+// import { useSession } from "next-auth/react";
 import { type FC, type ReactNode } from "react";
 import { useAccount } from "wagmi";
 
 import HowToPlay from "~/components/utils/HowToPlay";
 import { Wallet } from "~/components/Wallet";
-import SignInWithEthereum from "~/components/Wallet/SignIn";
+// import SignInWithEthereum from "~/components/Wallet/SignIn";
 import { APP_NAME } from "~/constants";
 
 type Props = {
@@ -15,7 +15,7 @@ type Props = {
 
 export const Layout: FC<Props> = ({ children }) => {
   const { address } = useAccount();
-  const { data: sessionData } = useSession();
+  // const { data: sessionData } = useSession();
   
   return (
     <div className="flex flex-col gap-2 max-w-3xl mx-auto px-2">
@@ -33,12 +33,13 @@ export const Layout: FC<Props> = ({ children }) => {
             {!address && (
               <Wallet withWalletAggregator />
             )}
-            {/* user is connected but not signed in */}
+            {/* user is connected but not signed in
             {address && !sessionData?.user && (
               <SignInWithEthereum showDisconnect={true} />
-            )}
+            )} */}
             {/* user is connected and signed in */}
-            {address && sessionData?.user && (
+            {/* {address && sessionData?.user && ( */}
+            {address && (
               <Wallet withWalletAggregator />
             )}
           </div>
