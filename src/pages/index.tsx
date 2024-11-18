@@ -1,6 +1,5 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { useAccount } from "wagmi";
 
 import { Wallet } from "~/components/Wallet";
@@ -8,7 +7,6 @@ import { APP_DESCRIPTION, APP_NAME } from "~/constants";
 
 export default function Home() {
   const { address } = useAccount();
-  const { data: sessionData } = useSession();
   
   return (
     <>
@@ -25,7 +23,7 @@ export default function Home() {
           {!address && (
             <Wallet btnLabel="Connect Wallet To Play" />
           )}
-          {address && sessionData?.user && (
+          {address && (
             <Link href="/contest/create" className="btn btn-lg btn-primary">
               Create Contest
             </Link>
