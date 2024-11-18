@@ -252,14 +252,14 @@ export const ContestForm: FC = () => {
                 <TokenPicker id="boxCurrency" onTokenSelected={handleTokenSelected} selectedToken={boxCurrency} />
               </div>
             </div>
-            {true && (
+            {/* {true && (
               <label className="label text-opacity-50">
                 <span></span>
                 <span className="label-text capitalize">
                   ~$costUsd
                 </span>
               </label>
-            )}
+            )} */}
           </div>
           <Transaction
             chainId={DEFAULT_CHAIN.id}

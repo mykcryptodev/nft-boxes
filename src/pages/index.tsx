@@ -4,7 +4,6 @@ import { useSession } from "next-auth/react";
 import { useAccount } from "wagmi";
 
 import { Wallet } from "~/components/Wallet";
-import SignInWithEthereum from "~/components/Wallet/SignIn";
 import { APP_DESCRIPTION, APP_NAME } from "~/constants";
 
 export default function Home() {
@@ -20,17 +19,14 @@ export default function Home() {
       </Head>
       <main className="flex flex-col justify-center">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight text-center">
+          <h1 className="text-6xl sm:text-7xl font-extrabold tracking-tight text-center">
             {APP_NAME}
           </h1>
           {!address && (
             <Wallet btnLabel="Connect Wallet To Play" />
           )}
-          {address && !sessionData?.user && (
-            <SignInWithEthereum btnLabel="Sign In To Play" />
-          )}
           {address && sessionData?.user && (
-            <Link href="/contest/create" className="btn btn-primary">
+            <Link href="/contest/create" className="btn btn-lg btn-primary">
               Create Contest
             </Link>
           )}

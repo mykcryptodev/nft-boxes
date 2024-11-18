@@ -12,7 +12,6 @@ type Props = {
 }
 
 export const Header: FC<Props> = ({ game, contest, onSwapToggle }) => {
-  console.log({ game });
   const [isSwapOpen, setIsSwapOpen] = useState<boolean>(false);
   useEffect(() => {
     onSwapToggle(isSwapOpen);

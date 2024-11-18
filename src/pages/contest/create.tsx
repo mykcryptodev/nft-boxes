@@ -4,10 +4,7 @@ import ContestForm from "~/components/Contest/Form";
 
 export const CreateContest: NextPage = () => {
   return (
-    <div>
-        Creating Contest...
-        <ContestForm />
-    </div>
+    <ContestForm />
   )
 }
 
