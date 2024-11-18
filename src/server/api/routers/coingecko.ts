@@ -5,6 +5,7 @@ import { z } from "zod";
 import { SUPPORTED_CHAINS } from "~/constants";
 import { COINGECKO_UNKNOWN_IMG } from "~/constants";
 import coingeckoList from "~/constants/tokenLists/coingecko.json";
+import { DEFAULT_TOKENS } from "~/constants/tokens";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
@@ -22,9 +23,6 @@ export const coingeckoRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       // check if the address passed in was native, rely on the chain for that
       const chain = SUPPORTED_CHAINS.find((c) => c.id === input.chainId);
-      if (chain?.testnet) {
-        return COINGECKO_UNKNOWN_IMG;
-      }
       if (!chain) {
         throw new Error(`Chain ${input.chainId} not supported`);
       }
@@ -33,10 +31,20 @@ export const coingeckoRouter = createTRPCRouter({
       if (tokenIsNative && chainMetadata?.icon?.url) {
         return chainMetadata.icon.url;
       }
+      // check default tokens for an image
+      const token = DEFAULT_TOKENS.find((t) => t.address.toLowerCase() === input.tokenAddress.toLowerCase());
+      if (token?.image) {
+        return token.image;
+      }
       // before making any external calls, lets check the hardcoded json for a fast lookup
       const tokenInList = coingeckoList.tokens.find((t) => t.address.toLowerCase() === input.tokenAddress.toLowerCase());
       if (tokenInList?.logoURI) {
         return tokenInList.logoURI;
+      }
+
+      // do not ask coingecko for testnets
+      if (chain?.testnet) {
+        return COINGECKO_UNKNOWN_IMG;
       }
 
       type ChainNames = Record<string, string>;
