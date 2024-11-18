@@ -40,7 +40,7 @@ export const Scoreboard: FC<Props> = ({ game, scoresOnchain }) => {
   const Quarter: FC<{ number: number, name: string  }> = ({ number, name }) => {
     const isOnchain = (scoresOnchain?.qComplete ?? 0) >= number;
     return (
-      <div className={`tooltip tooltip-${number < 3 ? 'top' : 'left'} sm:tooltip-top cursor-pointer`} data-tip={`${isOnchain ? `${name} scores are synced onchain` : `${name} scores are not yet onchain`}`}>
+      <div className={`tooltip tooltip-${number < 2 ? 'top' : 'left'} sm:tooltip-top cursor-pointer`} data-tip={`${isOnchain ? `${name} scores are synced onchain` : `${name} scores are not yet onchain`}`}>
         <div className="flex w-full justify-center items-center gap-1">
           <div>{name}</div>
           <div className={`w-2 h-2 rounded-full ${isOnchain ? 'bg-primary' : 'bg-warning'}`} />
