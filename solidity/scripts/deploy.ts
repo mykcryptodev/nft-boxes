@@ -1,4 +1,5 @@
 import hre from "hardhat";
+import { Boxes, Contests, ContestsReader, GameScoreOracle, RandomNumbers } from "../typechain-types";
 // Colour codes for terminal prints
 const RESET = "\x1b[0m";
 const GREEN = "\x1b[32m";
@@ -14,12 +15,12 @@ const FUNCTIONS_ROUTER = {
 
 const VRF_WRAPPER = {
   "84532": "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed",
-  "8453": "0xd5d517abe5cf79b7e95ec98db0f0277788aff634",
+  "8453": "0xb0407dbe851f8318bd31404A49e658143C982F23",
 }
 
 const FUNCTIONS_SUBSCRIPTION_ID = {
   "84532": 208,
-  "8453": 208,
+  "8453": 6,
 }
 
 const FUNCTIONS_SUBSCRIPTIONS_REGISTRY = {
@@ -46,8 +47,16 @@ async function main() {
   const [deployer] = await hre.ethers.getSigners();
   const { chainId } = await deployer.provider.getNetwork();
 
-  const boxes = await hre.ethers.deployContract("Boxes");
-  await boxes.waitForDeployment();
+  let boxes: Boxes;
+  try {
+    boxes = await hre.ethers.deployContract("Boxes");
+    await boxes.waitForDeployment();
+  } catch (e) {
+    console.log("Error deploying Boxes contract, waiting 10 seconds before retrying...\n", e);
+    await delay(10000); // wait 10 seconds
+    boxes = await hre.ethers.deployContract("Boxes");
+    await boxes.waitForDeployment();
+  }
   const boxesAddress = await boxes.getAddress();
   contractsToVerify.push({
     name: "Boxes",
@@ -59,8 +68,16 @@ async function main() {
   const gameScoreOracleArgs = [
     FUNCTIONS_ROUTER[chainId.toString() as keyof typeof FUNCTIONS_ROUTER]
   ];
-  const gameScoreOracle = await hre.ethers.deployContract("GameScoreOracle", gameScoreOracleArgs);
-  await gameScoreOracle.waitForDeployment();
+  let gameScoreOracle: GameScoreOracle;
+  try {
+    gameScoreOracle = await hre.ethers.deployContract("GameScoreOracle", gameScoreOracleArgs);
+    await gameScoreOracle.waitForDeployment();
+  } catch (e) {
+    console.log("Error deploying GameScoreOracle contract, waiting 10 seconds before retrying...\n", e);
+    await delay(10000); // wait 10 seconds
+    gameScoreOracle = await hre.ethers.deployContract("GameScoreOracle", gameScoreOracleArgs);
+    await gameScoreOracle.waitForDeployment();
+  }
   const gameScoreOracleAddress = await gameScoreOracle.getAddress();
   contractsToVerify.push({
     name: "gameScoreOracle",
@@ -69,8 +86,16 @@ async function main() {
   });
   console.log("gameScoreOracle deployed to: " + `${GREEN}${gameScoreOracleAddress}${RESET}\n`);
 
-  const contestsReader = await hre.ethers.deployContract("ContestsReader");
-  await contestsReader.waitForDeployment();
+  let contestsReader: ContestsReader;
+  try {
+    contestsReader = await hre.ethers.deployContract("ContestsReader");
+    await contestsReader.waitForDeployment();
+  } catch (e) {
+    console.log("Error deploying ContestsReader contract, waiting 10 seconds before retrying...\n", e);
+    await delay(10000); // wait 10 seconds
+    contestsReader = await hre.ethers.deployContract("ContestsReader");
+    await contestsReader.waitForDeployment();
+  }
   const contestsReaderAddress = await contestsReader.getAddress();
   console.log("ContestsReader deployed to: " + `${GREEN}${contestsReaderAddress}${RESET}\n`);
   contractsToVerify.push({
@@ -82,8 +107,17 @@ async function main() {
   const randomNumbersArgs = [
     VRF_WRAPPER[chainId.toString() as keyof typeof VRF_WRAPPER],
   ];
-  const randomNumbers = await hre.ethers.deployContract("RandomNumbers", randomNumbersArgs);
-  await randomNumbers.waitForDeployment();
+  console.log("RandomNumbers args: ", randomNumbersArgs);
+  let randomNumbers: RandomNumbers;
+  try {
+    randomNumbers = await hre.ethers.deployContract("RandomNumbers", randomNumbersArgs);
+    await randomNumbers.waitForDeployment();
+  } catch (e) {
+    console.log("Error deploying RandomNumbers contract, waiting 10 seconds before retrying...\n", e);
+    await delay(10000); // wait 10 seconds
+    randomNumbers = await hre.ethers.deployContract("RandomNumbers", randomNumbersArgs);
+    await randomNumbers.waitForDeployment();
+  }
   const randomNumbersAddress = await randomNumbers.getAddress();
   contractsToVerify.push({
     name: "RandomNumbers",
@@ -111,9 +145,16 @@ async function main() {
     contestsReaderAddress,
     randomNumbersAddress,
   ];
-  const contests = await hre.ethers.deployContract("Contests", contestsArgs);
-
-  await contests.waitForDeployment();
+  let contests: Contests;
+  try {
+    contests = await hre.ethers.deployContract("Contests", contestsArgs);
+    await contests.waitForDeployment();
+  } catch (e) {
+    console.log("Error deploying Contests contract, waiting 10 seconds before retrying...\n", e);
+    await delay(10000); // wait 10 seconds
+    contests = await hre.ethers.deployContract("Contests", contestsArgs);
+    await contests.waitForDeployment();
+  }
   const contestsAddress = await contests.getAddress();
   contractsToVerify.push({
     name: "Contests",
@@ -146,11 +187,25 @@ async function main() {
       await delay(20000);
       console.log("Verifying the last contract...\n");
     }
-    await hre.run("verify:verify", {
-      address, 
-      constructorArguments
-    });
-    console.log(`Successfully verified ${contract.name} at address: ${GREEN}${contract.address}${RESET}\n`);
+    try {
+      await hre.run("verify:verify", {
+        address, 
+        constructorArguments
+      });
+      console.log(`Successfully verified ${contract.name} at address: ${GREEN}${contract.address}${RESET}\n`);
+    } catch (e) {
+      console.log("Error verifying contract, waiting 10 seconds before retrying...\n", e);
+      await delay(10000); // wait 10 seconds
+      try {
+        await hre.run("verify:verify", {
+          address, 
+          constructorArguments
+        });
+        console.log(`Successfully verified ${contract.name} at address: ${GREEN}${contract.address}${RESET}\n`);
+      } catch (e) {
+        console.log("Error verifying contract, giving up...\n", e);
+      }
+    }
   }
   console.table(contractsToVerify.reduce((acc: Record<string, string>, contract) => {
     acc[contract.name] = contract.address;
