@@ -10,6 +10,7 @@ import {Boxes} from "../src/Boxes.sol";
 import {GameScoreOracle} from "../src/GameScoreOracle.sol";
 import "./DummyVRF.sol";
 import "forge-std/console.sol";
+import "./DummyRandomNumbers.sol";
 
 contract ContestsReaderTest is Test {
     ContestsReader public reader;
@@ -18,7 +19,7 @@ contract ContestsReaderTest is Test {
     Boxes public boxes;
     GameScoreOracle public gameScoreOracle;
     DummyVRF public dummyVRF;
-
+    DummyRandomNumbers public randomNumbers;
     address public constant TREASURY = address(0x1);
     address public constant VRF_WRAPPER = address(0x4);
 
@@ -38,13 +39,16 @@ contract ContestsReaderTest is Test {
         gameScoreOracle = new GameScoreOracle(
             address(dummyVRF) // not really the router, but it's fine for testing
         );
+
+        randomNumbers = new DummyRandomNumbers(address(dummyVRF));
+
         // Deploy Contests contract
         contests = new Contests(
             TREASURY,
             boxes,
             gameScoreOracle,
             reader,
-            address(dummyVRF)
+            randomNumbers
         );
 
         // set boxes

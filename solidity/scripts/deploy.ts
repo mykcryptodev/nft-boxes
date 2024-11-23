@@ -1,5 +1,4 @@
 import hre from "hardhat";
-
 // Colour codes for terminal prints
 const RESET = "\x1b[0m";
 const GREEN = "\x1b[32m";
@@ -17,6 +16,25 @@ const VRF_WRAPPER = {
   "84532": "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed",
   "8453": "0xd5d517abe5cf79b7e95ec98db0f0277788aff634",
 }
+
+const FUNCTIONS_SUBSCRIPTION_ID = {
+  "84532": 208,
+  "8453": 208,
+}
+
+const FUNCTIONS_SUBSCRIPTIONS_REGISTRY = {
+  "84532": "0xf9B8fc078197181C841c296C876945aaa425B278",
+  "8453": "0xf9B8fc078197181C841c296C876945aaa425B278",
+}
+
+const FUNCTION_SUBSCRIPTION_ABI = [{
+  "inputs":[{"internalType":"uint64","name":"subscriptionId","type":"uint64"},{"internalType":"address","name":"consumer","type":"address"}],
+  "name":"addConsumer",
+  "outputs":[],
+  "stateMutability":"nonpayable",
+  "type":"function"
+}];
+
 interface ContractToVerify {
   name: string;
   address: string;
@@ -61,12 +79,37 @@ async function main() {
     constructorArguments: [],
   });
 
+  const randomNumbersArgs = [
+    VRF_WRAPPER[chainId.toString() as keyof typeof VRF_WRAPPER],
+  ];
+  const randomNumbers = await hre.ethers.deployContract("RandomNumbers", randomNumbersArgs);
+  await randomNumbers.waitForDeployment();
+  const randomNumbersAddress = await randomNumbers.getAddress();
+  contractsToVerify.push({
+    name: "RandomNumbers",
+    address: randomNumbersAddress,
+    constructorArguments: randomNumbersArgs,
+  });
+  console.log("RandomNumbers deployed to: " + `${GREEN}${randomNumbersAddress}${RESET}\n`);
+
+  // get the contract deployed at the functions subscription registry
+  const functionsSubscriptionRegistry = await hre.ethers.getContractAt(
+    FUNCTION_SUBSCRIPTION_ABI,
+    FUNCTIONS_SUBSCRIPTIONS_REGISTRY[chainId.toString() as keyof typeof FUNCTIONS_SUBSCRIPTIONS_REGISTRY]
+  );
+  // call the addConsumer function
+  await functionsSubscriptionRegistry.addConsumer(
+    FUNCTIONS_SUBSCRIPTION_ID[chainId.toString() as keyof typeof FUNCTIONS_SUBSCRIPTION_ID],
+    gameScoreOracleAddress
+  );
+  console.log("GameScoreOracle added to the Functions Subscription Registry\n");
+
   const contestsArgs = [
     await deployer.getAddress(),
     boxesAddress,
     gameScoreOracleAddress,
     contestsReaderAddress,
-    VRF_WRAPPER[chainId.toString() as keyof typeof VRF_WRAPPER],
+    randomNumbersAddress,
   ];
   const contests = await hre.ethers.deployContract("Contests", contestsArgs);
 
@@ -85,6 +128,9 @@ async function main() {
   // set the contests in the contestsReader contract
   await contestsReader.setContestStorage(contestsAddress);
   console.log("Contests set in the ContestsReader contract\n");
+  // set contests in the randomNumbers contract
+  await randomNumbers.setContests(contestsAddress);
+  console.log("Contests set in the RandomNumbers contract\n");
 
   console.log(
     "Waiting 30 seconds before beginning the contract verification to allow the block explorer to index the contract...\n",

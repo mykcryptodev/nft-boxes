@@ -5,14 +5,13 @@ pragma solidity ^0.8.22;
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
-import {VRFV2PlusWrapperConsumerBase} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFV2PlusWrapperConsumerBase.sol";
-import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 import {GameScoreOracle} from "./GameScoreOracle.sol";
 import {Boxes} from "./Boxes.sol";
 import {ContestsReader} from "./ContestsReader.sol";
 import {IContestTypes} from "./IContestTypes.sol";
+import {RandomNumbers} from "./RandomNumbers.sol";
 
-contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiver {
+contract Contests is ConfirmedOwner, IERC721Receiver {
     using SafeERC20 for IERC20;
 
     uint256 public nextTokenId;
@@ -81,6 +80,7 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
     error BoxCostNotSet();
     error BoxesCannotBeClaimed();
     error CallerNotContestCreator();
+    error CallerNotRandomNumbers();
 
     ////////////////////////////////////////////////
     ///////////   CHAINLINK VARIABLES    ///////////
@@ -90,23 +90,29 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
     // Gas For VRF Trigger
     uint32 public vrfGas = 250_000;
 
-    // the request for randomly assigning scores to rows and cols
-    mapping (uint256 vrfRequest => uint256 contestId) private vrfScoreAssignments;
+    // RandomNumbers contract reference
+    RandomNumbers public randomNumbers;
+
+    // modifier for only random numbers contract
+    modifier onlyRandomNumbers() {
+        if (msg.sender != address(randomNumbers)) revert CallerNotRandomNumbers();
+        _;
+    }
 
     constructor(
         address treasury_,
         Boxes boxes_,
         GameScoreOracle gameScoreOracle_,
         ContestsReader contestsReader_,
-        address _vrfWrapper
+        RandomNumbers randomNumbers_
     )
-    VRFV2PlusWrapperConsumerBase(_vrfWrapper)
     ConfirmedOwner(msg.sender) {
         if (treasury_ == address(0)) revert ZeroAddress();
         treasury = treasury_;
         boxes = boxes_;
         gameScoreOracle = gameScoreOracle_;
         contestsReader = contestsReader_;
+        randomNumbers = randomNumbers_;
     }
 
     ////////////////////////////////////////////////
@@ -121,12 +127,19 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         if (msg.value < vrfFee) revert InsufficientPayment();
         // fetch the contest
         IContestTypes.Contest memory contest = contests[_contestId];
-        // only the contest creator can fetch random values if not all boxes have been claimed
+        if (contest.randomValuesSet) revert RandomValuesAlreadyFetched();
         if (contest.boxesClaimed != NUM_BOXES_IN_CONTEST) {
             if (msg.sender != contest.creator) revert CallerNotContestCreator();
         }
-        // fetch the random values
-        _fetchRandomValues(_contestId);
+
+        // Forward the call to RandomNumbers contract
+        randomNumbers.requestRandomNumbers{value: msg.value}(_contestId);
+        
+        // Update contest state
+        contest.boxesCanBeClaimed = false;
+        contests[_contestId] = contest;
+        
+        emit ScoresRequested(_contestId);
     }
 
     ////////////////////////////////////////////////
@@ -285,36 +298,6 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
     ///////////   INTERNAL FUNCTIONS     ///////////
     ////////////////////////////////////////////////
     /**
-        Reach out to chainlink to request random values for a contests rows and cols
-     */
-    function _fetchRandomValues (uint256 _contestId) internal {
-        // fetch the contest
-        IContestTypes.Contest memory contest = contests[_contestId];
-        // do not allow for another chainlink request if one has already been made
-        if (contest.randomValuesSet) revert RandomValuesAlreadyFetched();
-        // fetch 2 random numbers from chainlink: one for rows, and one for cols
-        uint256 requestId;
-        uint256 reqPrice;
-        (requestId, reqPrice) = requestRandomnessPayInNative(
-            vrfGas, // callbackGasLimit
-            3, // requestConfirmations
-            2, // numWords
-            VRFV2PlusClient._argsToBytes(
-                VRFV2PlusClient.ExtraArgsV1({nativePayment: true})
-            )
-        );
-        // store this request to be looked up later when the randomness is fulfilled
-        vrfScoreAssignments[requestId] = _contestId;
-        // update the contest so that boxes cannot be claimed anymore
-        // we update this here instead of the fulfill so that nobody can front run
-        // claiming box after the randomness of the rows and cols were determined
-        contest.boxesCanBeClaimed = false;
-        contests[_contestId] = contest;
-        // emit event that the boxes were requested to be assigned scores
-        emit ScoresRequested(_contestId);
-    }
-
-    /**
         Returns true if the user owns a box in the given contest
      */
     function _userOwnsBoxInContest (address user, uint256 contestId) internal view returns (bool) {
@@ -371,62 +354,9 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         if (!sent) revert FailedToSendETH();
     }
 
-    /**
-        Chainlink's callback to provide us with randomness
-     */
-    function fulfillRandomWords(
-        uint256 requestId, /* requestId */
-        uint256[] memory randomWords
-    ) internal override {
-        // the contest id that made this request
-        uint256 contestId = vrfScoreAssignments[requestId];
-        // fetch the contest object from the id
-        IContestTypes.Contest memory contest = contests[contestId];
-        // flag that chainlink has provided this contest with random values
-        contest.randomValuesSet = true;
-        // randomly assign scores to the rows and cols
-        contest.rows = _shuffleScores(randomWords[0]);
-        contest.cols = _shuffleScores(randomWords[1]);
-        // save the contest
-        contests[contestId] = contest;
-        // emit the event
-        emit ScoresAssigned(contest.id);
-    }
-
-    /**
-        Randomly shuffle array of scores
-     */
-    function _shuffleScores(
-        uint256 randomNumber
-    ) internal view returns(uint8[] memory shuffledScores) {
-        // set shuffled scores to the default
-        shuffledScores = defaultScores;
-        // randomly shuffle the array of scores
-        for (uint8 i = 0; i < 10;) {
-            uint256 n = i + uint256(keccak256(abi.encodePacked(randomNumber))) % (10 - i);
-            uint8 temp = shuffledScores[n];
-            shuffledScores[n] = shuffledScores[i];
-            shuffledScores[i] = temp;
-            unchecked{ ++i; }
-        }
-        // return the shuffled array
-        return shuffledScores;
-    }
-
     ////////////////////////////////////////////////
     ///////////     OWNER FUNCTIONS      ///////////
     ////////////////////////////////////////////////
-
-    /**
-        Sets Gas Limits for VRF Callback
-     */
-    function setGasLimits(uint32 vrfGas_) external onlyOwner {
-        vrfGas = vrfGas_;
-    }
-
-    function setVrfFee(uint256 vrfFee_) external onlyOwner {
-        vrfFee = vrfFee_;
-    }
 
     /**
         Sets The Address Of The Treasury
@@ -435,6 +365,15 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
     function setTreasury(address treasury_) external onlyOwner {
         if (treasury_ == address(0)) revert ZeroAddress();
         treasury = treasury_;
+    }
+
+    /**
+        Sets The Address Of The Random Numbers Contract
+        @param randomNumbers_ random numbers contract address - cannot be 0
+     */
+    function setRandomNumbers(address randomNumbers_) external onlyOwner {
+        if (randomNumbers_ == address(0)) revert ZeroAddress();
+        randomNumbers = RandomNumbers(randomNumbers_);
     }
 
     ////////////////////////////////////////////////
@@ -551,5 +490,20 @@ contract Contests is VRFV2PlusWrapperConsumerBase, ConfirmedOwner, IERC721Receiv
         bytes calldata
     ) external pure override returns (bytes4) {
         return this.onERC721Received.selector;
+    }
+
+    // Add function for RandomNumbers contract to call back
+    function fulfillRandomNumbers(
+        uint256 contestId,
+        uint8[] memory rows,
+        uint8[] memory cols
+    ) external onlyRandomNumbers {        
+        IContestTypes.Contest memory contest = contests[contestId];
+        contest.randomValuesSet = true;
+        contest.rows = rows;
+        contest.cols = cols;
+        contests[contestId] = contest;
+        
+        emit ScoresAssigned(contestId);
     }
 }
