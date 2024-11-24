@@ -23,8 +23,10 @@ type Props = {
   boxId: string;
   localProfile: User | null | undefined;
   boxesAddress: string;
+  showName?: boolean;
+  avatarSize?: number;
 }
-export const Owner: FC<Props> = ({ owner, boxId, localProfile, boxesAddress }) => {
+export const Owner: FC<Props> = ({ owner, boxId, localProfile, boxesAddress, showName, avatarSize = 6 }) => {
   const [profiles, setProfiles] = useState<SocialProfile[]>([]);
   const [shouldFetchProfiles, setShouldFetchProfiles] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -84,10 +86,17 @@ export const Owner: FC<Props> = ({ owner, boxId, localProfile, boxesAddress }) =
 
   return (
     <>
-      <label htmlFor={`${owner}-${boxId}`} onClick={() => setShouldFetchProfiles(true)} className="cursor-pointer">
+      <label 
+        htmlFor={`${owner}-${boxId}`} 
+        onClick={() => setShouldFetchProfiles(true)} 
+        className={"cursor-pointer flex flex-col items-center"}
+      >
         {owner && owner !== CONTEST_CONTRACT[DEFAULT_CHAIN.id] ? (
-          <Avatar className="w-6 h-6" address={owner} defaultComponent={OwnerAvatarComponent} />
+          <Avatar className={`w-${avatarSize} h-${avatarSize}`} address={owner} defaultComponent={OwnerAvatarComponent} />
         ) : null}
+        {showName && (
+          <span className="font-bold text-lg">{displayName}</span>
+        )}
       </label>
       <Portal>
         <input type="checkbox" id={`${owner}-${boxId}`} className="modal-toggle" />

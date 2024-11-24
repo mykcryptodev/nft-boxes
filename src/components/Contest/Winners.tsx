@@ -1,20 +1,24 @@
-import { Avatar, Name } from "@coinbase/onchainkit/identity";
-import { type FC } from "react";
+import { Avatar, useName } from "@coinbase/onchainkit/identity";
+import { type FC,useMemo } from "react";
 import { toTokens } from "thirdweb";
+import { shortenAddress } from "thirdweb/utils";
+import { base } from "viem/chains";
 
 import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { useBoxOwner } from "~/hooks/useBoxOwner";
 import { type Contest,type ScoresOnChain } from "~/types/contest";
+import { api } from "~/utils/api";
 
+import { GradientAvatar } from "../Identity/GradientAvatar";
 import { ClaimReward } from "./ClaimReward";
+import { Owner } from "../Identity/Owner";
 
 type Props = {
   contest: Contest;
   scoresOnchain: ScoresOnChain;
 }
 export const Winners: FC<Props> = ({ contest, scoresOnchain }) => {
-  console.log({ scoresOnchain, contest})
   // Helper function to get winning box for a quarter
   const getQuarterWinningTokenId = (quarterIndex: number) => {
     if (!scoresOnchain || !contest.rows || !contest.cols) return null;
@@ -46,13 +50,20 @@ export const Winners: FC<Props> = ({ contest, scoresOnchain }) => {
   }
 
   const Winner: FC<{ tokenId: number, rewards: string, quarterIndex: number }> = ({ tokenId, rewards, quarterIndex }) => {
-    const { owner } = useBoxOwner(contest.boxesAddress, tokenId);
+    const { owner, localProfile } = useBoxOwner(contest.boxesAddress, tokenId);
+
     return (
       <div className="flex items-center justify-center">
         {owner && owner !== CONTEST_CONTRACT[DEFAULT_CHAIN.id] ? (
           <div className="flex flex-col gap-1 items-center justify-center">
-            <Avatar className="w-12 h-12" address={owner} />
-            <Name address={owner} className="text-base-content" />
+            <Owner 
+              owner={owner} 
+              boxId={tokenId.toString()} 
+              localProfile={localProfile} 
+              boxesAddress={contest.boxesAddress} 
+              showName={true}
+              avatarSize={12}
+            />
             <ClaimReward 
               contest={contest} 
               tokenId={tokenId} 
