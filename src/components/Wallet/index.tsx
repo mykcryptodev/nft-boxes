@@ -18,12 +18,14 @@ import { signOut, useSession } from 'next-auth/react';
 import { useEffect } from 'react';
 import { useAccount } from "wagmi";
 
+import { GradientAvatar } from '../Identity/GradientAvatar';
+
 type Props = {
   btnLabel?: string;
   withWalletAggregator?: boolean;
 }
 export function Wallet({ btnLabel, withWalletAggregator }: Props) {
-  const { isDisconnected } = useAccount();
+  const { isDisconnected, address } = useAccount();
   const { data: sessionData } = useSession();
 
   useEffect(() => {
@@ -37,12 +39,16 @@ export function Wallet({ btnLabel, withWalletAggregator }: Props) {
     <div className="flex gap-2 items-center">
       <WalletComponent>
         <ConnectWallet withWalletAggregator={withWalletAggregator} text={btnLabel}>
-          <Avatar className="h-6 w-6" />
+          <Avatar className="h-6 w-6" defaultComponent={
+            <GradientAvatar address={address ?? ""} className="w-full h-full" />
+          } />
           <Name />
         </ConnectWallet>
         <WalletDropdown>
           <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-            <Avatar />
+            <Avatar defaultComponent={
+              <GradientAvatar address={address ?? ""} className="w-full h-full" />
+            }/>
             <Name />
             <Address className={color.foregroundMuted} />
             <EthBalance />

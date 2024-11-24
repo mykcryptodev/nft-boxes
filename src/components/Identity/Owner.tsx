@@ -16,12 +16,15 @@ import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { env } from "~/env";
 
+import { GradientAvatar } from "./GradientAvatar";
+
 type Props = {
   owner: Address | null;
   boxId: string;
   localProfile: User | null | undefined;
+  boxesAddress: string;
 }
-export const Owner: FC<Props> = ({ owner, boxId, localProfile }) => {
+export const Owner: FC<Props> = ({ owner, boxId, localProfile, boxesAddress }) => {
   const [profiles, setProfiles] = useState<SocialProfile[]>([]);
   const [shouldFetchProfiles, setShouldFetchProfiles] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -61,20 +64,29 @@ export const Owner: FC<Props> = ({ owner, boxId, localProfile }) => {
     void fetchProfiles();
   }, [owner, boxId, shouldFetchProfiles]);
 
-  console.log({ profiles });
+  console.log({ profiles, localProfile });
+
+  const OwnerAvatarComponent = useMemo(() => {
+    if (localProfile?.image && localProfile.image !== "") {
+      return (
+        <Image
+          src={localProfile.image}
+          alt={localProfile?.name ?? shortenAddress(owner!)}
+          width={48}
+          height={48}
+        />
+      )
+    }
+    return (
+      <GradientAvatar address={owner ?? ""} className="w-full h-full" />
+    )
+  }, [localProfile?.image, localProfile?.name, owner]);
 
   return (
     <>
       <label htmlFor={`${owner}-${boxId}`} onClick={() => setShouldFetchProfiles(true)} className="cursor-pointer">
         {owner && owner !== CONTEST_CONTRACT[DEFAULT_CHAIN.id] ? (
-          <Avatar className="w-6 h-6" address={owner} defaultComponent={
-            <Image
-              src={localProfile?.image ?? "/images/anonymous.png"}
-              alt={localProfile?.name ?? shortenAddress(owner)}
-              width={24}
-              height={24}
-            />
-          } />
+          <Avatar className="w-6 h-6" address={owner} defaultComponent={OwnerAvatarComponent} />
         ) : null}
       </label>
       <Portal>
@@ -85,14 +97,7 @@ export const Owner: FC<Props> = ({ owner, boxId, localProfile }) => {
               <XMarkIcon className="w-4 h-4 stroke-2" />
             </label>
             <h3 className="text-2xl font-bold flex items-center gap-2">
-              <Avatar className="w-12 h-12" address={owner} defaultComponent={
-                <Image
-                  src={localProfile?.image ?? "/images/anonymous.png"}
-                  alt={localProfile?.name ?? shortenAddress(owner!)}
-                  width={48}
-                  height={48}
-                />
-              } />
+              <Avatar className="w-12 h-12" address={owner} defaultComponent={OwnerAvatarComponent} />
               <div className="flex flex-col">
                 <span>{displayName}</span>
                 <div className="flex items-center gap-1 opacity-50">
@@ -114,7 +119,7 @@ export const Owner: FC<Props> = ({ owner, boxId, localProfile }) => {
             )}
             <div className="modal-action">
               <Link
-                href={`https://opensea.io/assets/${DEFAULT_CHAIN.name}/${CONTEST_CONTRACT[DEFAULT_CHAIN.id]}/${boxId}`}
+                href={`https://opensea.io/assets/${DEFAULT_CHAIN.name.toLowerCase()}/${boxesAddress}/${boxId}`}
                 target="_blank"
                 className="btn"
               >

@@ -61,7 +61,7 @@ const Contest: FC<GameProps> = ({ contestId }) => {
           </div>
         </>
       )}
-      <div className={`${activeTab === "Grid" && !swapIsOpen ? "block" : "hidden"}`}>
+      <div className={`${activeTab === "Grid" && !swapIsOpen ? "block" : "hidden"} mb-10`}>
         <Grid 
           game={game} 
           contest={contest} 

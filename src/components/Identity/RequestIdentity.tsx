@@ -57,11 +57,11 @@ export const RequestIdentity: FC<Props> = ({ contest }) => {
   }, [contest.id, address]);
 
   useEffect(() => {
-    if (isLocalProfileLoading || isNameLoading) return;
+    if (isLocalProfileLoading || isNameLoading || !address) return;
     if (isUserInContest && !name && !localProfile?.name) {
       setIsOpen(true);
     }
-  }, [isUserInContest, name, isLocalProfileLoading, isNameLoading, localProfile?.name]);
+  }, [isUserInContest, name, isLocalProfileLoading, address, isNameLoading, localProfile?.name]);
   
   return (
     <>

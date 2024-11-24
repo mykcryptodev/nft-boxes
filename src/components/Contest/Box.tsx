@@ -71,6 +71,7 @@ export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnsele
             <Owner
               owner={owner}
               boxId={boxId.toString()}
+              boxesAddress={boxesAddress}
               localProfile={localProfile}
             />
           ) : null}

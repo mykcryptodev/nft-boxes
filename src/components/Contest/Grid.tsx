@@ -1,4 +1,4 @@
-import { type FC } from "react";
+import { type FC, useEffect,useState } from "react";
 
 import { type Contest,type ScoresOnChain } from "~/types/contest";
 import { type Game } from "~/types/game";
@@ -29,6 +29,67 @@ export const Grid: FC<Props> = ({
   setContestKey,
   refetch 
 }) => {
+  const [visibleBoxes, setVisibleBoxes] = useState(20);
+  
+  useEffect(() => {
+    const loadMoreBoxes = () => {
+      if (visibleBoxes < 121) {
+        setVisibleBoxes(prev => Math.min(prev + 20, 121));
+      }
+    };
+
+    const interval = setInterval(loadMoreBoxes, 1500);
+    
+    return () => clearInterval(interval);
+  }, [visibleBoxes]);
+
+  const renderBox = (i: number, isLoading = false) => {
+    const rowNumber = Math.floor(i / 11);
+    const colNumber = i % 11;
+    const boxId = i % 11 === 0 || i < 11 ? 0 : (rowNumber - 1) * 10 + colNumber - 1;
+
+    if (i % 11 === 0 || i < 11) {
+      if (contest.randomValuesSet) {
+        return (
+          <div key={i} className="border-2 rounded-lg w-full h-full aspect-square grid place-content-center bg-base-200">
+            {(i === 0) ? '' : (rowNumber === 0) ? contest.cols[colNumber - 1] : (colNumber === 0) ? contest.rows[rowNumber - 1] : ''}
+          </div>
+        )
+      }
+      return (
+        <div key={i} className="border-2 rounded-lg w-full h-full aspect-square grid place-content-center bg-base-300 animate-pulse" />
+      )
+    }
+
+    if (isLoading) {
+      return (
+        <div 
+          key={i} 
+          className="border-2 rounded-lg w-full h-full aspect-square grid place-content-center animate-pulse bg-base-300"
+        />
+      );
+    }
+
+    return (
+      <Box
+        key={i} 
+        boxId={boxId + (Number(contest.id) * 100)}
+        boxesAddress={contest.boxesAddress}
+        selectedBoxIds={selectedBoxIds}
+        onBoxSelected={(boxId) => {
+          setSelectedBoxIds([...selectedBoxIds, boxId]);
+        }}
+        onBoxUnselected={(boxId) => {
+          setSelectedBoxIds(selectedBoxIds.filter((id) => id !== boxId));
+        }}
+        contest={contest}
+        game={game}
+        row={rowNumber}
+        col={colNumber} 
+        scoresOnchain={scoresOnchain}
+      />
+    );
+  };
 
   return (
     <>
@@ -54,46 +115,11 @@ export const Grid: FC<Props> = ({
         </div>
         <div className="grid col-span-10">
           <div className="grid grid-cols-11 grid-rows-11 gap-1 w-full h-full">
-            {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
-            {[...Array(121)].map((_, i) => {
-              const rowNumber = Math.floor(i / 11);
-              const colNumber = i % 11;
-              // the box id is based on the position of the box. 
-              // the boxes in the first column and the boxes in the first row do not get IDs
-              // the box in the upper left corner (0, 0) gets an ID of 0
-              const boxId = i % 11 === 0 || i < 11 ? 0 : (rowNumber - 1) * 10 + colNumber - 1;
-
-              if (i % 11 === 0 || i < 11) {
-                if (contest.randomValuesSet) {
-                  return (
-                    <div key={i} className={`border-2 rounded-lg w-full h-full aspect-square grid place-content-center bg-base-200`}>
-                      {(i === 0) ? '' : (rowNumber === 0) ? contest.cols[colNumber - 1] : (colNumber === 0) ? contest.rows[rowNumber - 1] : ''}
-                    </div>
-                  )
-                }
-                return (
-                  <div key={i} className={`border-2 rounded-lg w-full h-full aspect-square grid place-content-center bg-base-200`} />
-                )
+            {Array.from({ length: 121 }).map((_, i) => {
+              if (i < visibleBoxes) {
+                return renderBox(i);
               }
-              return (
-                <Box
-                  key={i} 
-                  boxId={boxId + (Number(contest.id) * 100)}
-                  boxesAddress={contest.boxesAddress}
-                  selectedBoxIds={selectedBoxIds}
-                  onBoxSelected={(boxId) => {
-                    setSelectedBoxIds([...selectedBoxIds, boxId]);
-                  }}
-                  onBoxUnselected={(boxId) => {
-                    setSelectedBoxIds(selectedBoxIds.filter((id) => id !== boxId));
-                  }}
-                  contest={contest}
-                  game={game}
-                  row={rowNumber}
-                  col={colNumber} 
-                  scoresOnchain={scoresOnchain}
-                />
-              )
+              return renderBox(i, true);
             })}
           </div>
         </div>
@@ -110,6 +136,5 @@ export const Grid: FC<Props> = ({
         }}
       />
     </>
-
   );
 };
