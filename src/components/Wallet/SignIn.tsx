@@ -1,3 +1,4 @@
+import { cn } from '@coinbase/onchainkit/theme';
 import { getCsrfToken, signIn, useSession } from 'next-auth/react';
 import React, { type FC, useState } from 'react';
 import { SiweMessage } from 'siwe';
@@ -8,8 +9,9 @@ import { APP_NAME } from '~/constants';
 type Props = {
   btnLabel?: string;
   showDisconnect?: boolean;
+  className?: string;
 }
-const SignInWithEthereum: FC<Props> = ({ btnLabel, showDisconnect }) => {
+const SignInWithEthereum: FC<Props> = ({ btnLabel, showDisconnect, className }) => {
   const { disconnect } = useDisconnect();
   const { data: sessionData } = useSession();
   const { signMessageAsync } = useSignMessage();
@@ -56,7 +58,7 @@ const SignInWithEthereum: FC<Props> = ({ btnLabel, showDisconnect }) => {
     <div className="flex items-center gap-2">
       <button 
         onClick={promptToSign}
-        className="btn"
+        className={cn("btn", className)}
         disabled={isSigningIn}
       >
         {isSigningIn && (

@@ -8,15 +8,20 @@ import { type Address } from "viem";
 import { DEFAULT_CHAIN } from "~/constants";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
+import { api } from "~/utils/api";
 
 export const useBoxOwner = (
   boxesAddress: string, 
   tokenId: number,
-  includeProfiles = false
+  includeThirdwebProfiles = false
 ) => {
   const [owner, setOwner] = useState<Address | null>(null);
   const [profiles, setProfiles] = useState<SocialProfile[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const { data: localProfile } = api.user.getIdentity.useQuery({
+    address: owner ?? "",
+  });
 
   useEffect(() => {
     setIsLoading(true);
@@ -35,7 +40,7 @@ export const useBoxOwner = (
         tokenId: BigInt(tokenId),
       });
       setOwner(result as Address);
-      if (includeProfiles) {
+      if (includeThirdwebProfiles) {
         const profiles = await getSocialProfiles({
           address: result as Address,
           client,
@@ -45,7 +50,7 @@ export const useBoxOwner = (
       setIsLoading(false);
     }
     void getOwner();
-  }, [boxesAddress, includeProfiles, tokenId]);
+  }, [boxesAddress, includeThirdwebProfiles, tokenId]);
 
-  return { owner, profiles, isLoading };
+  return { owner, profiles, isLoading, localProfile };
 }

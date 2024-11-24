@@ -1,8 +1,8 @@
-import { Avatar } from "@coinbase/onchainkit/identity";
 import React, { useMemo } from "react";
 import { type FC } from "react";
 import { isAddress, isAddressEqual } from "viem";
 
+import { Owner } from "~/components/Identity/Owner";
 import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { useBoxIsWinner } from "~/hooks/useBoxIsWinner";
@@ -24,7 +24,7 @@ type Props = {
 }
 
 export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnselected, selectedBoxIds, contest, game, row, col, scoresOnchain }) => {
-  const { owner, isLoading: isOwnerLoading } = useBoxOwner(boxesAddress, boxId);
+  const { owner, isLoading: isOwnerLoading, localProfile } = useBoxOwner(boxesAddress, boxId);
   const { hasWon } = useBoxIsWinner({
     col,
     row,
@@ -67,7 +67,13 @@ export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnsele
     <div className={`h-full w-full rounded-lg flex items-center justify-center relative p-px ${hasWon ? 'bg-gradient-to-b from-primary to-secondary' : 'bg-base-300'}`}>
       <div className="bg-base-300 h-full w-full flex items-center justify-center rounded-[calc(0.5rem-1px)]">
         <div className="flex items-center justify-center">
-          {owner && owner !== CONTEST_CONTRACT[DEFAULT_CHAIN.id] ? (<Avatar className="w-6 h-6" address={owner} />) : null}
+          {owner && owner !== CONTEST_CONTRACT[DEFAULT_CHAIN.id] ? (
+            <Owner
+              owner={owner}
+              boxId={boxId.toString()}
+              localProfile={localProfile}
+            />
+          ) : null}
         </div>
       </div>
     </div>

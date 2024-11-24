@@ -1,6 +1,7 @@
 import { type FC,useState } from "react";
 
 import Scoreboard from "~/components/Contest/Scoreboard";
+import { RequestIdentity } from "~/components/Identity/RequestIdentity";
 import useContest from "~/hooks/useContest";
 import useScoresOnchain from "~/hooks/useScoresOnchain";
 import { api } from "~/utils/api";
@@ -78,6 +79,7 @@ const Contest: FC<GameProps> = ({ contestId }) => {
           scoresOnchain={scoresOnchain} 
         />
       </div>
+      <RequestIdentity contest={contest} />
     </div>
   );
 };
