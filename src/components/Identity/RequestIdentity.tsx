@@ -65,8 +65,6 @@ export const RequestIdentity: FC<Props> = ({ contest }) => {
   
   return (
     <>
-      <label htmlFor="identity_modal" className="btn">open modal</label>
-
       <input type="checkbox" id="identity_modal" className="modal-toggle" checked={isOpen} />
       <div className="modal" role="dialog">
         <div className="modal-box relative">
