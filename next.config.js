@@ -25,6 +25,14 @@ const config = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/.well-known/farcaster.json',
+        destination: '/api/.well-known/farcaster.json',
+      },
+    ];
+  },
 };
 
 export default config;

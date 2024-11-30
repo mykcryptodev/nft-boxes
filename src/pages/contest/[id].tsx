@@ -1,6 +1,7 @@
 import { type GetServerSideProps, type NextPage } from "next";
+import dynamic from "next/dynamic";
 
-import Contest from "~/components/Contest";
+const Contest = dynamic(() => import("~/components/Contest"), { ssr: false });
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.query;
