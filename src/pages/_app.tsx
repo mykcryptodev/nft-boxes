@@ -1,4 +1,4 @@
-import { FrameMetadata } from '@coinbase/onchainkit/frame';
+// import { FrameMetadata } from '@coinbase/onchainkit/frame';
 import { type AppType } from "next/app";
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
@@ -48,7 +48,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={imageUrl} />
-        <FrameMetadata
+        {/* <FrameMetadata
           buttons={[
             {
               action: 'link',
@@ -60,7 +60,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
             src: imageUrl,
             aspectRatio: '1.91:1'
           }}
-        />
+        /> */}
       </Head>
       <SessionProvider session={session}>
         <OnchainProviders>
