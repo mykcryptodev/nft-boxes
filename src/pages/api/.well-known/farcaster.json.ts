@@ -1,5 +1,4 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
-
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ message: 'Method not allowed' });
@@ -10,17 +9,17 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const config = {
     accountAssociation: {
       header:
-        "eyJmaWQiOjM2MjEsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgyY2Q4NWEwOTMyNjFmNTkyNzA4MDRBNkVBNjk3Q2VBNENlQkVjYWZFIn0",
-      payload: "eyJkb21haW4iOiJmcmFtZXMtdjIudmVyY2VsLmFwcCJ9",
+        "eyJmaWQiOjIxNzI0OCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGViYTc4NzE3YjZmMDU5Y2ZlMGI3NWU3NWMyZWQ0YmI3Y2E2NTE1NGYifQ==",
+      payload: "eyJkb21haW4iOiJzdXBlcmJvd2wtb25jaGFpbi1naXQtZnJhbWVzLXYyLW15a2NyeXB0b2RldnMtcHJvamVjdHMudmVyY2VsLmFwcCJ9",
       signature:
-        "MHhiNDIwMzQ1MGZkNzgzYTExZjRiOTllZTFlYjA3NmMwOTdjM2JkOTY1NGM2ODZjYjkyZTAyMzk2Y2Q0YjU2MWY1MjY5NjI5ZGQ5NTliYjU0YzEwOGI4OGVmNjdjMTVlZTdjZDc2YTRiMGU5NzkzNzA3YzkxYzFkOWFjNTg0YmQzNjFi",
+        "0x281f897d272c5dbc2e18385232a9f4c4de14bf7ac6c809d2d5ebad17de9d497861eee63aefa1a9bdf537f17a280a37e1825cf8f6cd0326baa6ea2d6f874ef66a1b",
     },
     frame: {
-      version: "0.0.0",
-      name: "Frames v2 Demo",
-      iconUrl: `${appUrl}/icon.png`,
-      splashImageUrl: `${appUrl}/splash.png`,
-      splashBackgroundColor: "#f7f7f7",
+      version: "vNext",
+      name: "NFL Boxes",
+      iconUrl: `${appUrl}/images/icon.png`,
+      splashImageUrl: `${appUrl}/images/logo.png`,
+      splashBackgroundColor: "#fafafa",
       homeUrl: appUrl,
     },
   };
