@@ -1,4 +1,5 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ message: 'Method not allowed' });
@@ -13,7 +14,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     //   return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
     // }
     // return appUrl;
-    return "https://superbowl-onchain-git-frames-v2-mykcryptodevs-projects.vercel.app"
+    return "https://superbowl-onchain-git-frames-v2-mykcryptodevs-projects.vercel.app";
   };
 
   const config = {

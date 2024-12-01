@@ -21,13 +21,6 @@ const OnchainProviders = dynamic(
   },
 );
 
-const FrameMetadata = dynamic(
-  () => import('~/components/utils/FrameMetadata'),
-  {
-    ssr: false,
-  }
-);
-
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
@@ -37,6 +30,20 @@ const MyApp: AppType<{ session: Session | null }> = ({
   const pageDescription = APP_DESCRIPTION;
   const pageUrl = APP_URL;
   const imageUrl = `${APP_URL}/images/og.gif`;
+
+  const frameEmbedMetadata = {
+    imageUrl: `${APP_URL}/images/logo.png`,
+    button: {
+      title: "Play NFL Boxes",
+      action: {
+        type: 'launch',
+        name: 'NFL Boxes',
+        url: pageUrl,
+        splashImageUrl: `${APP_URL}/images/icon.png`,
+        splashBackgroundColor: '#fafafa',
+      }
+    }
+  }
 
   return (
     <>
@@ -55,8 +62,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={imageUrl} />
+        <meta name="fc:frame" content={JSON.stringify(frameEmbedMetadata)} />
       </Head>
-      <FrameMetadata />
       <SessionProvider session={session}>
         <OnchainProviders>
           <Layout>
