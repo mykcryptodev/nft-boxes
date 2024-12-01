@@ -27,7 +27,7 @@ export default function FrameMetadata() {
     button: {
       title: "Play NFL Boxes",
       action: {
-        type: 'launch_frame',
+        type: 'launch',
         name: 'NFL Boxes',
         url: currentPageUrl,
         splashImageUrl: `${baseUrl}/images/icon.png`,
