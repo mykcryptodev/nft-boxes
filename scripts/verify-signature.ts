@@ -20,9 +20,9 @@ async function main() {
     payload: encodedPayload,
     signature: encodedSignature,
   } = {
-    header: "eyJmaWQiOjIxNzI0OCwidHlwZSI6ImN1c3RvZHkiLCJzaWduZXIiOiIweGViYTc4NzE3YjZmMDU5Y2ZlMGI3NWU3NWMyZWQ0YmI3Y2E2NTE1NGYifQ",
+    header: "eyJmaWQiOjIxNzI0OCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGViYTc4NzE3YjZmMDU5Y2ZlMGI3NWU3NWMyZWQ0YmI3Y2E2NTE1NGYifQ",
     payload: "eyJkb21haW4iOiJzdXBlcmJvd2wtb25jaGFpbi52ZXJjZWwuYXBwIn0",
-    signature: "MHg5YWFhMzM1ZmUxM2FhYjdjYmU3ODg4NzE2NTY5NDNiNGU2MTljYWNkZmM1MGEyYjZmMWI4MzM0NWU3ZDBmYmM2MTMwYTc5NGZmNzY3Y2ZiOTQ1NTVhYWQzZjJhMzU0ZDcxMjE1Yjk5YjI4ZTY2Y2UxMGY3NjEwOTAyYWQ4YmRiMzFj"
+    signature: "MHhlOTliY2MxYTE0ZTNhOTVhNWU4MTVjMDM2OWFkNjQxZGU3N2NiZDlmNGYxZGNhYjY4ZjY0ZmE0OGQxN2RmZWNmNmQyMTE0MTc4MDQzN2M0MTI3ZWU3YTNhODMxMThiYjhmMWM0MzdkMWJmODI4ZWM4MzYxODM4OGMzYmM4MmI5MTFj"
   };
 
   console.log('Step 1: Decoding and validating header...');
@@ -30,7 +30,7 @@ async function main() {
   const headerData = JSON.parse(Buffer.from(encodedHeader, 'base64url').toString('utf-8'));
   console.log('Header data:', headerData);
 
-  const { fid, type, signer } = headerData;
+  const { fid, type, key } = headerData;
 
   if (type !== 'custody') {
     throw new Error("Invalid type - must be 'custody'");
@@ -42,12 +42,18 @@ async function main() {
   console.log('Payload data:', payloadData);
 
   console.log('\nStep 3: Verifying signature...');
+  console.log({
+    type,
+    key,
+    message: `${encodedHeader}.${encodedPayload}`,
+    signature: encodedSignature,
+  })
   // Decode signature from base64url
   const signature = Buffer.from(encodedSignature, 'base64url').toString();
   
   // Verify the signature
   const valid = await verifyMessage({
-    address: signer as `0x${string}`,
+    address: key as `0x${string}`,
     message: `${encodedHeader}.${encodedPayload}`,
     signature: signature as `0x${string}`,
   });
@@ -73,9 +79,9 @@ async function main() {
   });
 
   console.log('Resolved custody address:', resolvedCustodyAddress);
-  console.log('Signer from header:', signer);
+  console.log('Signer from header:', key);
 
-  if (resolvedCustodyAddress.toLowerCase() !== signer.toLowerCase()) {
+  if (resolvedCustodyAddress.toLowerCase() !== key.toLowerCase()) {
     throw new Error("Wrong custody address");
   }
   console.log('✅ Custody address matches');

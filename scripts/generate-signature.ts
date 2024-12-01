@@ -19,7 +19,7 @@ async function main() {
   const header = {
     fid: FID,
     type: "custody",
-    signer: CUSTODY_ADDRESS,
+    key: CUSTODY_ADDRESS,
   };
 
   // Create the payload object

@@ -12,9 +12,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const config = {
     accountAssociation: {
       header:
-        "eyJmaWQiOjIxNzI0OCwidHlwZSI6ImN1c3RvZHkiLCJzaWduZXIiOiIweGViYTc4NzE3YjZmMDU5Y2ZlMGI3NWU3NWMyZWQ0YmI3Y2E2NTE1NGYifQ",
+        "eyJmaWQiOjIxNzI0OCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGViYTc4NzE3YjZmMDU5Y2ZlMGI3NWU3NWMyZWQ0YmI3Y2E2NTE1NGYifQ",
       payload: "eyJkb21haW4iOiJzdXBlcmJvd2wtb25jaGFpbi52ZXJjZWwuYXBwIn0",
-      signature: "MHg5YWFhMzM1ZmUxM2FhYjdjYmU3ODg4NzE2NTY5NDNiNGU2MTljYWNkZmM1MGEyYjZmMWI4MzM0NWU3ZDBmYmM2MTMwYTc5NGZmNzY3Y2ZiOTQ1NTVhYWQzZjJhMzU0ZDcxMjE1Yjk5YjI4ZTY2Y2UxMGY3NjEwOTAyYWQ4YmRiMzFj",
+      signature: "MHhlOTliY2MxYTE0ZTNhOTVhNWU4MTVjMDM2OWFkNjQxZGU3N2NiZDlmNGYxZGNhYjY4ZjY0ZmE0OGQxN2RmZWNmNmQyMTE0MTc4MDQzN2M0MTI3ZWU3YTNhODMxMThiYjhmMWM0MzdkMWJmODI4ZWM4MzYxODM4OGMzYmM4MmI5MTFj",
     },
     frame: {
       version: "0.0.0",
