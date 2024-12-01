@@ -22,7 +22,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       iconUrl: `${getBaseUrl()}/images/icon.png`,
       splashImageUrl: `${getBaseUrl()}/images/logo.png`,
       splashBackgroundColor: "#fafafa",
-      homeUrl: getBaseUrl(),
     },
   };
 
