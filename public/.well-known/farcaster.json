@@ -1,0 +1,15 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjIxNzI0OCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGViYTc4NzE3YjZmMDU5Q0ZFMGI3NUU3NUMyZWQ0QkI3Y0E2NTE1NEYifQ",
+    "payload": "eyJkb21haW4iOiJzdXBlcmJvd2wtb25jaGFpbi52ZXJjZWwuYXBwIn0",
+    "signature": "MHgwYmUwMDIyMDYzMmU1Y2RiZTMxNjVhNWIzYTQ2MjM0NDM2MzBkZWNkNTljMDllMTIxNjY1M2M5ZjU4MWU4OTQzNTFlYmYxNjc0MjE2ZDExMzgyOWVkNzJmYWMzOGI5NjRjZWMwZGViYTRjYTJjNjIwNDc3MThjMDBmYWU0MjE1MjFi"
+  },
+  "frame": {
+    "version": "0.0.0",
+    "name": "NFL Boxes",
+    "homeUrl": "https://superbowl-onchain.vercel.app",
+    "iconUrl": "https://superbowl-onchain.vercel.app/images/icon.png",
+    "splashImageUrl": "https://superbowl-onchain.vercel.app/images/logo.png",
+    "splashBackgroundColor": "#fcfcfc"
+  }
+}
