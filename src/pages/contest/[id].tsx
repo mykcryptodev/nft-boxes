@@ -32,7 +32,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   // Set cache-control headers for revalidation
   context.res.setHeader(
     'Cache-Control',
-    'public, s-maxage=1, stale-while-revalidate=59'
+    'no-store'
   );
 
   // Pre-compute the frame metadata during SSR
