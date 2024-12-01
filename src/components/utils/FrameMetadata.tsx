@@ -25,11 +25,14 @@ export default function FrameMetadata() {
   const frameEmbedMetadata = {
     imageUrl: `${baseUrl}/images/logo.png`,
     button: {
-      type: 'launch_frame',
-      name: 'NFL Boxes',
-      url: currentPageUrl,
-      splashImageUrl: `${baseUrl}/images/icon.png`,
-      splashBackgroundColor: '#fafafa',
+      title: "Play NFL Boxes",
+      action: {
+        type: 'launch_frame',
+        name: 'NFL Boxes',
+        url: currentPageUrl,
+        splashImageUrl: `${baseUrl}/images/icon.png`,
+        splashBackgroundColor: '#fafafa',
+      }
     }
   }
 
