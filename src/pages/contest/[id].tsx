@@ -23,7 +23,7 @@ const ContestPage: NextPage<Props> = ({ contestId }) => {
     button: {
       title: "Play NFL Boxes",
       action: {
-        type: 'launch',
+        type: 'launch_frame',
         name: 'NFL Boxes',
         url: `${APP_URL}/contest/${contestId}`,
         splashImageUrl: `${APP_URL}/images/icon.png`,
