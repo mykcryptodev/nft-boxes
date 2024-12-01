@@ -65,7 +65,7 @@ export const Grid: FC<Props> = ({
         )
       }
       return (
-        <div key={i} className="border-2 rounded-lg w-full h-full aspect-square grid place-content-center bg-base-300 animate-pulse" />
+        <div key={i} className="border-2 rounded-lg w-full h-full aspect-square grid place-content-center bg-base-300" />
       )
     }
 
