@@ -4,15 +4,16 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_URL;
+  // const appUrl = process.env.NEXT_PUBLIC_URL;
   const getBaseUrl = () => {
-    if (process.env.NEXT_PUBLIC_VERCEL_URL) {
-      if (process.env.NEXT_PUBLIC_VERCEL_URL.startsWith('http')) {
-        return process.env.NEXT_PUBLIC_VERCEL_URL;
-      }
-      return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
-    }
-    return appUrl;
+    // if (process.env.NEXT_PUBLIC_VERCEL_URL) {
+    //   if (process.env.NEXT_PUBLIC_VERCEL_URL.startsWith('http')) {
+    //     return process.env.NEXT_PUBLIC_VERCEL_URL;
+    //   }
+    //   return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+    // }
+    // return appUrl;
+    return "https://superbowl-onchain-git-frames-v2-mykcryptodevs-projects.vercel.app"
   };
 
   const config = {
