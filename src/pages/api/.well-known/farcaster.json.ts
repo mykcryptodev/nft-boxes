@@ -5,6 +5,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const appUrl = process.env.NEXT_PUBLIC_URL;
+  const getBaseUrl = () => {
+    if (process.env.NEXT_PUBLIC_VERCEL_URL) {
+      if (process.env.NEXT_PUBLIC_VERCEL_URL.startsWith('http')) {
+        return process.env.NEXT_PUBLIC_VERCEL_URL;
+      }
+      return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+    }
+    return appUrl;
+  };
 
   const config = {
     accountAssociation: {
@@ -16,10 +25,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     frame: {
       version: "vNext",
       name: "NFL Boxes",
-      iconUrl: `${appUrl}/images/icon.png`,
-      splashImageUrl: `${appUrl}/images/logo.png`,
+      iconUrl: `${getBaseUrl()}/images/icon.png`,
+      splashImageUrl: `${getBaseUrl()}/images/logo.png`,
       splashBackgroundColor: "#fafafa",
-      homeUrl: appUrl,
+      homeUrl: getBaseUrl(),
     },
   };
 
