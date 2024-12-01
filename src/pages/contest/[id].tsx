@@ -19,11 +19,12 @@ type Props = {
 }
 const ContestPage: NextPage<Props> = ({ contestId }) => {
   const frameEmbedMetadata = {
+    version: "next",
     imageUrl: `${APP_URL}/images/footballs.jpg`,
     button: {
       title: "Play NFL Boxes",
       action: {
-        type: 'launch',
+        type: 'launch_frame',
         name: 'NFL Boxes',
         url: `${APP_URL}/contest/${contestId}`,
         splashImageUrl: `${APP_URL}/images/icon.png`,
