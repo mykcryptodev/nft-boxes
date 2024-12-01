@@ -38,7 +38,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   // Pre-compute the frame metadata during SSR
   const frameMetadata: FrameMetadata = {
     version: "next",
-    imageUrl: `${APP_URL}/images/footballs.jpg`,
+    imageUrl: `${APP_URL}/api/frame/image`,
     button: {
       title: "Play NFL Boxes",
       action: {
@@ -71,6 +71,7 @@ const ContestPage: NextPage<Props> = ({ contestId, frameMetadata }) => {
         <meta name="fc:frame" content={JSON.stringify(frameMetadata)} />
       </Head>
       <Contest contestId={contestId} />
+      <img src={frameMetadata.imageUrl} alt="Frame Image" />
     </>
   )
 }
