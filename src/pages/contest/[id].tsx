@@ -11,38 +11,43 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   // Set cache-control headers for revalidation
   context.res.setHeader(
     'Cache-Control',
-    'public, s-maxage=10, stale-while-revalidate=59'
+    'public, s-maxage=1, stale-while-revalidate=59'
   );
 
-  return {
-    props: {
-      contestId: id,
-    },
-  };
-};
-
-type Props = {
-  contestId: string;
-}
-const ContestPage: NextPage<Props> = ({ contestId }) => {
-  const frameEmbedMetadata = {
-    version: "next",
+  // Pre-compute the frame metadata during SSR
+  const frameMetadata = {
+    version: "vNext",
     imageUrl: `${APP_URL}/images/footballs.jpg`,
     button: {
       title: "Play NFL Boxes",
       action: {
         type: 'launch_frame',
         name: 'NFL Boxes',
-        url: `${APP_URL}/contest/${contestId}`,
+        url: `${APP_URL}/contest/${id}`,
         splashImageUrl: `${APP_URL}/images/icon.png`,
         splashBackgroundColor: '#fafafa',
       }
     }
-  }
+  };
+
+  return {
+    props: {
+      contestId: id,
+      frameMetadata: frameMetadata,
+    },
+  };
+};
+
+type Props = {
+  contestId: string;
+  frameMetadata: Record<string, any>;
+}
+
+const ContestPage: NextPage<Props> = ({ contestId, frameMetadata }) => {
   return (
     <>
       <Head>
-        <meta name="fc:frame" content={JSON.stringify(frameEmbedMetadata)} />
+        <meta name="fc:frame" content={JSON.stringify(frameMetadata)} />
       </Head>
       <Contest contestId={contestId} />
     </>
