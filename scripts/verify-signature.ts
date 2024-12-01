@@ -21,8 +21,8 @@ async function main() {
     signature: encodedSignature,
   } = {
     header: "eyJmaWQiOjIxNzI0OCwidHlwZSI6ImN1c3RvZHkiLCJzaWduZXIiOiIweGViYTc4NzE3YjZmMDU5Y2ZlMGI3NWU3NWMyZWQ0YmI3Y2E2NTE1NGYifQ",
-    payload: "eyJkb21haW4iOiJzdXBlcmJvd2wtb25jaGFpbi1naXQtZnJhbWVzLXYyLW15a2NyeXB0b2RldnMtcHJvamVjdHMudmVyY2VsLmFwcCJ9",
-    signature: "MHhiZDAyZTU2YmEzMmM3NWU1Mzk1OGIxMjg1ZTIyMDdlMzE0ZDM4MTYxN2IyMWZjYjAyMjY2MTcxYzBiMDdkNjNmNDEwODRlYmMzOTk3YzhmZjExZDJiOGIzOWY5NGYxM2M5NjViZDZkNDZiYjAyMjBkNjVmNTI2NWY3MGFlMWVlZDFj"
+    payload: "eyJkb21haW4iOiJzdXBlcmJvd2wtb25jaGFpbi52ZXJjZWwuYXBwIn0",
+    signature: "MHg5YWFhMzM1ZmUxM2FhYjdjYmU3ODg4NzE2NTY5NDNiNGU2MTljYWNkZmM1MGEyYjZmMWI4MzM0NWU3ZDBmYmM2MTMwYTc5NGZmNzY3Y2ZiOTQ1NTVhYWQzZjJhMzU0ZDcxMjE1Yjk5YjI4ZTY2Y2UxMGY3NjEwOTAyYWQ4YmRiMzFj"
   };
 
   console.log('Step 1: Decoding and validating header...');

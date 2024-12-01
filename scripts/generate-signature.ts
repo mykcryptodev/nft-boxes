@@ -4,7 +4,7 @@ import { mnemonicToAccount } from 'viem/accounts';
 
 // Replace with your seed phrase
 const MNEMONIC = ''; // 12 or 24 words separated by spaces
-const DOMAIN = 'superbowl-onchain-git-frames-v2-mykcryptodevs-projects.vercel.app';
+const DOMAIN = 'superbowl-onchain.vercel.app';
 const FID = 217248;
 const CUSTODY_ADDRESS = '0xeba78717b6f059cfe0b75e75c2ed4bb7ca65154f';
 
