@@ -1,6 +1,5 @@
 import { type GetServerSideProps, type NextPage } from "next";
 import dynamic from "next/dynamic";
-import Head from "next/head";
 import { APP_URL } from "~/constants";
 
 const Contest = dynamic(() => import("~/components/Contest"), { ssr: false });
@@ -51,6 +50,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   };
 
+  context.res.setHeader('Content-Type', 'text/html');
+  context.res.write(`
+    <head>
+      <meta name="fc:frame" content='${JSON.stringify(frameMetadata)}' />
+    </head>
+  `);
+
   return {
     props: {
       contestId: id,
@@ -66,12 +72,7 @@ type Props = {
 
 const ContestPage: NextPage<Props> = ({ contestId, frameMetadata }) => {
   return (
-    <>
-      <Head>
-        <meta name="fc:frame" content={JSON.stringify(frameMetadata)} />
-      </Head>
-      <Contest contestId={contestId} />
-    </>
+    <Contest contestId={contestId} />
   )
 }
 
