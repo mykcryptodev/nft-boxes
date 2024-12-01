@@ -1,6 +1,7 @@
 import sdk from "@farcaster/frame-sdk";
 import { fromHex, getAddress, numberToHex,SwitchChainError } from "viem";
 import { ChainNotConfiguredError, createConnector } from "wagmi";
+
 import { DEFAULT_CHAIN } from "~/constants";
 
 frameConnector.type = "frameConnector" as const;

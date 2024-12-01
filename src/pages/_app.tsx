@@ -26,13 +26,6 @@ const OnchainProviders = dynamic(
   },
 );
 
-const FrameContextProvider = dynamic(
-  () => import('~/providers/FrameContextProvider'),
-  {
-    ssr: false,
-  },
-);
-
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
@@ -70,15 +63,13 @@ const MyApp: AppType<{ session: Session | null }> = ({
         />
       </Head>
       <SessionProvider session={session}>
-        <FrameContextProvider>
-          <OnchainProviders>
-            <Layout>
-              <Component {...pageProps} />
-              <ToastContainer position="top-center" />
-            </Layout>
-            <div id="portal" />
-          </OnchainProviders>
-        </FrameContextProvider>
+        <OnchainProviders>
+          <Layout>
+            <Component {...pageProps} />
+            <ToastContainer position="top-center" />
+          </Layout>
+          <div id="portal" />
+        </OnchainProviders>
       </SessionProvider>
     </>
   );

@@ -58,7 +58,8 @@ const config = {
           ["^.+\\.s?css$"]
         ]
       }
-    ]
+    ],
+    "@typescript-eslint/no-unnecessary-type-assertion": "warn"
   }
 }
 module.exports = config;

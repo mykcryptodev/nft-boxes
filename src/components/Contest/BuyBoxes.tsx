@@ -1,6 +1,7 @@
 import { FundButton } from '@coinbase/onchainkit/fund';
 import { type LifecycleStatus, Transaction, TransactionButton, TransactionToast, TransactionToastAction, TransactionToastIcon, TransactionToastLabel } from '@coinbase/onchainkit/transaction';
 import { CheckIcon,DocumentDuplicateIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Call } from 'node_modules/@coinbase/onchainkit/esm/transaction/types';
 import { type FC,useCallback,useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { createThirdwebClient, encode, getContract, toTokens } from 'thirdweb';
@@ -180,7 +181,7 @@ export const BuyBoxes: FC<Props> = ({ contest, selectedBoxes, setSelectedBoxes, 
             <div className="btm-nav p-4 mx-auto max-w-3xl">
                 <Transaction
                     chainId={DEFAULT_CHAIN.id}
-                    calls={callsCallback}
+                    calls={callsCallback as unknown as Call[]}
                     onStatus={handleOnStatus}
                 >
                     <TransactionButton text={`Buy ${selectedBoxes.length} Boxes (${totalAmount} ${contest.boxCost.symbol})`} />

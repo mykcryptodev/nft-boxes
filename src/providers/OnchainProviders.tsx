@@ -66,6 +66,7 @@ const OnchainProviders: FC<Props> = ({ children }) => {
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [isFrameLoaded, setIsFrameLoaded] = useState<boolean>(false);
   const [frameContext, setFrameContext] = useState<FrameContext>();
+  console.log({ frameContext });
 
   useEffect(() => {
     const load = async () => {
@@ -82,7 +83,7 @@ const OnchainProviders: FC<Props> = ({ children }) => {
     setIsMounted(true);
   }, []);
 
-  if (!isMounted) {
+  if (!isMounted || !isFrameLoaded) {
     return null;
   }
 

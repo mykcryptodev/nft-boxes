@@ -2,6 +2,7 @@ import { type Token } from "@coinbase/onchainkit/token";
 import { type LifecycleStatus, Transaction, TransactionButton } from '@coinbase/onchainkit/transaction';
 import { watchContractEvent } from '@wagmi/core'
 import { useRouter } from "next/router";
+import { Call } from "node_modules/@coinbase/onchainkit/esm/transaction/types";
 import { type FC, useCallback, useEffect,useMemo, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { createThirdwebClient, encode, getContract, toUnits } from "thirdweb";
@@ -263,7 +264,7 @@ export const ContestForm: FC = () => {
           </div>
           <Transaction
             chainId={DEFAULT_CHAIN.id}
-            calls={callsCallback}
+            calls={callsCallback as unknown as Call[]}
             onStatus={handleOnStatus}
           >
             <TransactionButton text="Create Contest" />

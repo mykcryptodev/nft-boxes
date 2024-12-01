@@ -1,5 +1,6 @@
 import { type LifecycleStatus, Transaction, TransactionButton } from "@coinbase/onchainkit/transaction";
 import { watchContractEvent } from '@wagmi/core'
+import { Call } from "node_modules/@coinbase/onchainkit/esm/transaction/types";
 import { type FC,useCallback, useRef, useState } from "react";
 import { createThirdwebClient, encode, getContract } from "thirdweb";
 import { useReadContract } from "wagmi";
@@ -122,7 +123,7 @@ export const GenerateRandomValues: FC<Props> = ({ contest, onValuesGenerated }) 
           )}
           <div className="modal-action">
             <Transaction
-              calls={callsCallback}
+              calls={callsCallback as unknown as Call[]}
               onStatus={handleOnStatus}
             >
               <TransactionButton disabled={!vrfFee} text="Generate Random Values" />
