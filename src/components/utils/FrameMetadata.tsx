@@ -24,7 +24,7 @@ export default function FrameMetadata() {
 
   const frameEmbedMetadata = {
     version: "next",
-    imageUrl: `${baseUrl}/images/logo.png`,
+    imageUrl: `${baseUrl}/api/frame/image`,
     button: {
       title: "Play NFL Boxes",
       action: {
