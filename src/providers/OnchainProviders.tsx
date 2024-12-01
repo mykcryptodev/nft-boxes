@@ -52,7 +52,7 @@ const transports = SUPPORTED_CHAINS.reduce<Record<number, ReturnType<typeof http
 }, {});
 
 export const wagmiConfig = createConfig({
-  connectors: [frameConnector(), ...connectors],
+  connectors: [...connectors, frameConnector()],
   chains: SUPPORTED_CHAINS,
   syncConnectedChain: true,
   transports,
