@@ -29,11 +29,11 @@ const MyApp: AppType<{ session: Session | null }> = ({
   const pageTitle = `Play ${APP_NAME}`;
   const pageDescription = APP_DESCRIPTION;
   const pageUrl = APP_URL;
-  const imageUrl = `${APP_URL}/images/og.gif`;
+  const imageUrl = `${APP_URL}/api/frame/image`;
 
   const frameEmbedMetadata = {
     version: "next",
-    imageUrl: `${APP_URL}/images/logo.png`,
+    imageUrl: `${APP_URL}/api/frame/image`,
     button: {
       title: "Play NFL Boxes",
       action: {

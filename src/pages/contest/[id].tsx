@@ -71,7 +71,6 @@ const ContestPage: NextPage<Props> = ({ contestId, frameMetadata }) => {
         <meta name="fc:frame" content={JSON.stringify(frameMetadata)} />
       </Head>
       <Contest contestId={contestId} />
-      <img src={frameMetadata.imageUrl} alt="Frame Image" />
     </>
   )
 }
