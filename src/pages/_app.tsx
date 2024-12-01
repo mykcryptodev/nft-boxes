@@ -31,6 +31,17 @@ const MyApp: AppType<{ session: Session | null }> = ({
   pageProps: { session, ...pageProps },
 }) => {
 
+  const frameEmbedMetadata = {
+    imageUrl,
+    button: {
+      type: 'launch_frame',
+      name: 'NFL Boxes',
+      url: pageUrl,
+      splashImageUrl: `${APP_URL}/images/icon.png`,
+      splashBackgroundColor: '#fafafa',
+    }
+  }
+
   return (
     <>
       <Head>
@@ -48,6 +59,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={imageUrl} />
+        <meta name="fc:frame" content={JSON.stringify(frameEmbedMetadata)} />
         {/* <FrameMetadata
           buttons={[
             {
