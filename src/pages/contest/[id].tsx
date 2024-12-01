@@ -5,8 +5,29 @@ import { APP_URL } from "~/constants";
 
 const Contest = dynamic(() => import("~/components/Contest"), { ssr: false });
 
+interface FrameMetadata {
+  version: string;
+  imageUrl: string;
+  button: {
+    title: string;
+    action: {
+      type: string;
+      name: string;
+      url: string;
+      splashImageUrl: string;
+      splashBackgroundColor: string;
+    };
+  };
+}
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.query;
+  
+  if (typeof id !== 'string') {
+    return {
+      notFound: true
+    };
+  }
   
   // Set cache-control headers for revalidation
   context.res.setHeader(
@@ -15,8 +36,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   );
 
   // Pre-compute the frame metadata during SSR
-  const frameMetadata = {
-    version: "vNext",
+  const frameMetadata: FrameMetadata = {
+    version: "next",
     imageUrl: `${APP_URL}/images/footballs.jpg`,
     button: {
       title: "Play NFL Boxes",
@@ -40,7 +61,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 type Props = {
   contestId: string;
-  frameMetadata: Record<string, any>;
+  frameMetadata: FrameMetadata;
 }
 
 const ContestPage: NextPage<Props> = ({ contestId, frameMetadata }) => {
