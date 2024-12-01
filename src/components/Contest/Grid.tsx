@@ -1,4 +1,4 @@
-import { type FC, useEffect,useState } from "react";
+import { type FC, useEffect,useMemo,useState } from "react";
 
 import { type Contest,type ScoresOnChain } from "~/types/contest";
 import { type Game } from "~/types/game";
@@ -7,6 +7,8 @@ import Box from "./Box";
 import { BuyBoxes } from "./BuyBoxes";
 import GenerateRandomValues from "./GenerateRandomValues";
 import { TeamName } from "./TeamName";
+import { useAccount } from "wagmi";
+import { isAddressEqual } from "viem";
 
 type Props = {
   game: Game;
@@ -29,7 +31,13 @@ export const Grid: FC<Props> = ({
   setContestKey,
   refetch 
 }) => {
+  const { address } = useAccount();
   const [visibleBoxes, setVisibleBoxes] = useState(20);
+
+  const userIsContestOwner = useMemo(() =>{
+    if (!address) return false;
+    return isAddressEqual(address, contest.creator);
+  }, [address, contest.creator]);
   
   useEffect(() => {
     const loadMoreBoxes = () => {
@@ -93,14 +101,16 @@ export const Grid: FC<Props> = ({
 
   return (
     <>
-      <GenerateRandomValues 
-        contest={contest}
-        onValuesGenerated={() => {
-          setSelectedBoxIds([]);
-          setContestKey(contestKey + 1);
-          void refetch();
-        }} 
-      />
+      {(userIsContestOwner || contest.boxesClaimed === 100n) && (
+        <GenerateRandomValues 
+          contest={contest}
+          onValuesGenerated={() => {
+            setSelectedBoxIds([]);
+            setContestKey(contestKey + 1);
+            void refetch();
+          }} 
+        />
+      )}
       <div className="grid grid-cols-12 mt-2">
         <div className="grid col-span-1" />
         <div className="grid col-span-10 place-content-center text-2xl">
