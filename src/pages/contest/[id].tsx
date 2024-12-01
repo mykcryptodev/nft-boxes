@@ -7,6 +7,13 @@ const Contest = dynamic(() => import("~/components/Contest"), { ssr: false });
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.query;
+  
+  // Set cache-control headers for revalidation
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=10, stale-while-revalidate=59'
+  );
+
   return {
     props: {
       contestId: id,
