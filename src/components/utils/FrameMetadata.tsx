@@ -1,45 +1,13 @@
-import { useRouter } from 'next/router';
-import { APP_URL } from '~/constants';
-import Head from 'next/head';
-import { useEffect } from 'react';
+import Head from 'next/head'
 
-const getBaseUrl = () => {
-  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
-    if (process.env.NEXT_PUBLIC_VERCEL_URL.startsWith('http')) {
-      return process.env.NEXT_PUBLIC_VERCEL_URL;
-    }
-    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
-  }
-  return APP_URL;
-};
+interface FrameMetadataProps {
+  metadata: string
+}
 
-export default function FrameMetadata() {
-  const router = useRouter();
-  const baseUrl = getBaseUrl();
-  const currentPageUrl = `${baseUrl.replace(/\/$/, '')}${router.asPath}`;
-  
-  useEffect(() => {
-    console.log('FrameMetadata rendered:', { currentPageUrl, baseUrl });
-  }, [currentPageUrl, baseUrl]);
-
-  const frameEmbedMetadata = {
-    version: "next",
-    imageUrl: `${baseUrl}/api/frame/image`,
-    button: {
-      title: "Play NFL Boxes",
-      action: {
-        type: 'launch',
-        name: 'NFL Boxes',
-        url: currentPageUrl,
-        splashImageUrl: `${baseUrl}/images/icon.png`,
-        splashBackgroundColor: '#fafafa',
-      }
-    }
-  }
-
+export function FrameMetadata({ metadata }: FrameMetadataProps) {
   return (
     <Head>
-      <meta name="fc:frame" content={JSON.stringify(frameEmbedMetadata)} />
+      <meta name="fc:frame" content={metadata} />
     </Head>
-  );
+  )
 } 

@@ -1,41 +1,16 @@
-import { type GetServerSideProps, type NextPage } from "next";
-import dynamic from "next/dynamic";
-import { APP_URL } from "~/constants";
-
-const Contest = dynamic(() => import("~/components/Contest"), { ssr: false });
-
-interface FrameMetadata {
-  version: string;
-  imageUrl: string;
-  button: {
-    title: string;
-    action: {
-      type: string;
-      name: string;
-      url: string;
-      splashImageUrl: string;
-      splashBackgroundColor: string;
-    };
-  };
-}
+import { GetServerSideProps } from 'next'
+import { APP_URL } from '~/constants'
+import Contest from '~/components/Contest';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.query;
   
   if (typeof id !== 'string') {
-    return {
-      notFound: true
-    };
+    return { notFound: true };
   }
-  
-  // Set cache-control headers for revalidation
-  context.res.setHeader(
-    'Cache-Control',
-    'no-store'
-  );
 
-  // Pre-compute the frame metadata during SSR
-  const frameMetadata: FrameMetadata = {
+  // Generate the frame metadata
+  const frameMetadata = JSON.stringify({
     version: "next",
     imageUrl: `${APP_URL}/api/frame/image`,
     button: {
@@ -48,32 +23,24 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         splashBackgroundColor: '#fafafa',
       }
     }
-  };
+  });
 
-  context.res.setHeader('Content-Type', 'text/html');
-  context.res.write(`
-    <head>
-      <meta name="fc:frame" content='${JSON.stringify(frameMetadata)}' />
-    </head>
-  `);
+  // Attach the frame metadata to the request object
+  if (context.req) {
+    (context.req as any).frameMetadata = frameMetadata;
+  }
 
   return {
     props: {
       contestId: id,
-      frameMetadata: frameMetadata,
-    },
-  };
-};
+    }
+  }
+}
 
-type Props = {
+interface PageProps {
   contestId: string;
-  frameMetadata: FrameMetadata;
 }
 
-const ContestPage: NextPage<Props> = ({ contestId, frameMetadata }) => {
-  return (
-    <Contest contestId={contestId} />
-  )
+export default function ContestPage({ contestId }: PageProps) {
+  return <Contest contestId={contestId} />
 }
-
-export default ContestPage;

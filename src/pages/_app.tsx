@@ -1,9 +1,8 @@
-// import { FrameMetadata } from '@coinbase/onchainkit/frame';
-import { type AppType } from "next/app";
+import { AppContext, type AppType } from "next/app";
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { type Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
+import { getSession, SessionProvider } from "next-auth/react";
 import { ToastContainer } from 'react-toastify';
 
 import Layout from "~/components/utils/Layout";
@@ -31,21 +30,6 @@ const MyApp: AppType<{ session: Session | null }> = ({
   const pageUrl = APP_URL;
   const imageUrl = `${APP_URL}/api/frame/image`;
 
-  const frameEmbedMetadata = {
-    version: "next",
-    imageUrl: `${APP_URL}/api/frame/image`,
-    button: {
-      title: "Play NFL Boxes",
-      action: {
-        type: 'launch',
-        name: 'NFL Boxes',
-        url: pageUrl,
-        splashImageUrl: `${APP_URL}/images/icon.png`,
-        splashBackgroundColor: '#fafafa',
-      }
-    }
-  }
-
   return (
     <>
       <Head>
@@ -63,7 +47,6 @@ const MyApp: AppType<{ session: Session | null }> = ({
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={imageUrl} />
-        <meta name="fc:frame" content={JSON.stringify(frameEmbedMetadata)} />
       </Head>
       <SessionProvider session={session}>
         <OnchainProviders>
@@ -77,5 +60,24 @@ const MyApp: AppType<{ session: Session | null }> = ({
     </>
   );
 };
+
+
+MyApp.getInitialProps = async ({ Component, ctx }: AppContext) => {
+  const session = await getSession();
+  let pageProps = {}
+
+  if (Component.getInitialProps) {
+    pageProps = await Component.getInitialProps(ctx)
+  }
+
+  // Get the frame metadata from the response headers
+  const frameMetadata = ctx.res?.getHeader('x-frame-metadata')
+
+  return { 
+    pageProps,
+    session,
+    frameMetadata: frameMetadata || null
+  }
+}
 
 export default api.withTRPC(MyApp);
