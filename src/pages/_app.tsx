@@ -14,11 +14,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import '@coinbase/onchainkit/styles.css';
 import "~/styles/globals.css";
 
-const pageTitle = `Play ${APP_NAME}`;
-const pageDescription = APP_DESCRIPTION;
-const pageUrl = APP_URL;
-const imageUrl = `${APP_URL}/images/og.gif`;
-
 const OnchainProviders = dynamic(
   () => import('~/providers/OnchainProviders'),
   {
@@ -26,21 +21,22 @@ const OnchainProviders = dynamic(
   },
 );
 
+const FrameMetadata = dynamic(
+  () => import('~/components/utils/FrameMetadata'),
+  {
+    ssr: false,
+  }
+);
+
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
 
-  const frameEmbedMetadata = {
-    imageUrl,
-    button: {
-      type: 'launch_frame',
-      name: 'NFL Boxes',
-      url: pageUrl,
-      splashImageUrl: `${APP_URL}/images/icon.png`,
-      splashBackgroundColor: '#fafafa',
-    }
-  }
+  const pageTitle = `Play ${APP_NAME}`;
+  const pageDescription = APP_DESCRIPTION;
+  const pageUrl = APP_URL;
+  const imageUrl = `${APP_URL}/images/og.gif`;
 
   return (
     <>
@@ -59,21 +55,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={imageUrl} />
-        <meta name="fc:frame" content={JSON.stringify(frameEmbedMetadata)} />
-        {/* <FrameMetadata
-          buttons={[
-            {
-              action: 'link',
-              label: pageTitle,
-              target: pageUrl,
-            },
-          ]}
-          image={{
-            src: imageUrl,
-            aspectRatio: '1.91:1'
-          }}
-        /> */}
       </Head>
+      <FrameMetadata />
       <SessionProvider session={session}>
         <OnchainProviders>
           <Layout>
