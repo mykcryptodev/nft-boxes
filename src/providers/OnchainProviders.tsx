@@ -12,12 +12,14 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type FC, useEffect, useState } from 'react';
 import { createConfig, http,WagmiProvider } from 'wagmi';
+import { frameConnector } from "~/lib/frameConnector";
 
 import { APP_NAME, DEFAULT_CHAIN, EAS_SCHEMA_ID, SUPPORTED_CHAINS } from '~/constants';
 import { env } from '~/env';
 
 import '@coinbase/onchainkit/styles.css';
 import '@rainbow-me/rainbowkit/styles.css';
+import sdk, { type FrameContext } from '@farcaster/frame-sdk';
 
 const queryClient = new QueryClient();
  
@@ -50,7 +52,7 @@ const transports = SUPPORTED_CHAINS.reduce<Record<number, ReturnType<typeof http
 }, {});
 
 export const wagmiConfig = createConfig({
-  connectors,
+  connectors: [...connectors, frameConnector()],
   chains: SUPPORTED_CHAINS,
   syncConnectedChain: true,
   transports,
@@ -61,15 +63,30 @@ type Props = {
 }
 
 const OnchainProviders: FC<Props> = ({ children }) => {
-
   const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [isFrameLoaded, setIsFrameLoaded] = useState<boolean>(false);
+  const [frameContext, setFrameContext] = useState<FrameContext>();
+  console.log({ frameContext });
+
+  useEffect(() => {
+    const load = async () => {
+      setFrameContext(await sdk.context);
+      await sdk.actions.ready();
+    };
+    if (sdk && !isFrameLoaded) {
+      setIsFrameLoaded(true);
+      void load();
+    }
+  }, [isFrameLoaded]);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  if (!isMounted) {
+  if (!isMounted || !isFrameLoaded) {
     return null;
   }
+
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>

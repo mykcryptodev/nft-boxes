@@ -27,7 +27,7 @@ const Contest: FC<GameProps> = ({ contestId }) => {
   });
   const [selectedBoxIds, setSelectedBoxIds] = useState<number[]>([]);
 
-  const tabs = [ "Grid", "Winners", "My Boxes"] as const;
+  const tabs = [ "Grid", "Winners", /*"My Boxes"*/] as const;
   const [activeTab, setActiveTab] = useState<string>(tabs[0]);
   const [swapIsOpen, setSwapIsOpen] = useState<boolean>(false);
 

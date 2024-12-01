@@ -6,6 +6,34 @@ await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
 const config = {
+  transpilePackages: [
+    '@farcaster/frame-sdk',
+    '@farcaster/frame-core',
+    '@metamask/sdk',
+    '@wagmi/connectors',
+    'wagmi',
+    '@rainbow-me/rainbowkit'
+  ],
+  webpack: (config) => {
+    // Ignore all map files and TypeScript declaration files
+    config.module.rules.push({
+      test: /\.(js\.map|d\.ts|d\.ts\.map)$/,
+      loader: 'ignore-loader'
+    });
+
+    // Ignore source maps in production
+    if (config.mode === 'production') {
+      config.devtool = false;
+    }
+
+    config.resolve.extensionAlias = {
+      '.js': ['.js', '.ts'],
+      '.mjs': ['.mjs', '.mts'],
+      '.cjs': ['.cjs', '.cts'],
+    };
+    
+    return config;
+  },
   reactStrictMode: true,
 
   /**
@@ -24,6 +52,14 @@ const config = {
         hostname: "**",
       },
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/.well-known/farcaster.json',
+        destination: '/api/.well-known/farcaster.json',
+      },
+    ];
   },
 };
 

@@ -1,5 +1,6 @@
 import { type LifecycleStatus, Transaction, TransactionButton } from "@coinbase/onchainkit/transaction";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { Call } from "node_modules/@coinbase/onchainkit/esm/transaction/types";
 import { type FC,useCallback } from "react";
 import { createThirdwebClient, encode, getContract } from "thirdweb";
 
@@ -55,7 +56,7 @@ export const RefreshOnchainScores: FC<{ gameId: string }> = ({ gameId }) => {
             <Transaction
                 className="btn btn-ghost btn-xs btn-circle"
                 chainId={DEFAULT_CHAIN.id}
-                calls={callsCallback}
+                calls={callsCallback as unknown as Call[]}
                 onStatus={handleOnStatus}
             >
                 <TransactionButton text="Sync Scores Onchain" />

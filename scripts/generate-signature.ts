@@ -1,0 +1,66 @@
+import { createWalletClient, http } from 'viem';
+import { mainnet } from 'viem/chains';
+import { mnemonicToAccount } from 'viem/accounts';
+
+// Replace with your seed phrase
+const MNEMONIC = ''; // 12 or 24 words separated by spaces
+const DOMAIN = 'superbowl-onchain.vercel.app';
+const FID = 217248;
+const CUSTODY_ADDRESS = '0xeba78717b6f059cfe0b75e75c2ed4bb7ca65154f';
+
+async function main() {
+  // Create account from mnemonic
+  const account = mnemonicToAccount(MNEMONIC);
+  
+  console.log('Derived address:', account.address);
+  console.log('Make sure this matches your custody address!');
+
+  // Create the header object
+  const header = {
+    fid: FID,
+    type: "custody",
+    signer: CUSTODY_ADDRESS,
+  };
+
+  // Create the payload object
+  const payload = {
+    domain: DOMAIN,
+  };
+
+  // Convert to base64url (not base64)
+  const encodedHeader = Buffer.from(JSON.stringify(header)).toString('base64url');
+  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
+
+  // Create the message to sign
+  const messageToSign = `${encodedHeader}.${encodedPayload}`;
+  
+  const client = createWalletClient({
+    account,
+    chain: mainnet,
+    transport: http()
+  });
+
+  // Sign the message
+  const signature = await client.signMessage({
+    message: messageToSign,
+  });
+
+  // Encode signature to base64url
+  const encodedSignature = Buffer.from(signature).toString('base64url');
+
+  // Create both compact and JSON formats
+  const compactJfs = `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
+  const jsonJfs = {
+    header: encodedHeader,
+    payload: encodedPayload,
+    signature: encodedSignature
+  };
+
+  console.log('\nJSON Format (use this for your farcaster.json.ts):');
+  console.log(JSON.stringify(jsonJfs, null, 2));
+  
+  console.log('\nCompact Format:');
+  console.log(compactJfs);
+}
+
+main().catch(console.error); 

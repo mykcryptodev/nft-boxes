@@ -38,7 +38,7 @@ export const ClaimReward: FC<Props> = ({ contest, tokenId, rewards, quarterIndex
       contestId: BigInt(contest.id),
     });
     const claimCall ={
-      to: contract.address as Address,
+      to: contract.address as `0x${string}`,
       data: await encode(claimTx),
       value: 0n,
     };
