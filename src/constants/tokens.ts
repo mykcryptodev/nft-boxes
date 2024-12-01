@@ -40,8 +40,7 @@ const MOCHI: Token = {
 };
 
 const DEGEN: Token = {
-  // address: "0x4ed4e862860bed51a9570b96d89af5e1b0efefed",
-  address: "0xA068a7a0c7a0bc599C361f83DAcc1a069bE690F2",
+  address: "0x4ed4e862860bed51a9570b96d89af5e1b0efefed",
   chainId: DEFAULT_CHAIN.id,
   decimals: 18,
   image: "https://s2.coinmarketcap.com/static/img/coins/64x64/30096.png",
