@@ -24,7 +24,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       signature: "MHhiZDAyZTU2YmEzMmM3NWU1Mzk1OGIxMjg1ZTIyMDdlMzE0ZDM4MTYxN2IyMWZjYjAyMjY2MTcxYzBiMDdkNjNmNDEwODRlYmMzOTk3YzhmZjExZDJiOGIzOWY5NGYxM2M5NjViZDZkNDZiYjAyMjBkNjVmNTI2NWY3MGFlMWVlZDFj",
     },
     frame: {
-      version: "vNext",
+      version: "0.0.0",
       name: "NFL Boxes",
       iconUrl: `${getBaseUrl()}/images/icon.png`,
       splashImageUrl: `${getBaseUrl()}/images/logo.png`,
