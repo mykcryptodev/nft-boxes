@@ -9,11 +9,17 @@ const FID = 217248;
 const CUSTODY_ADDRESS = '0xeba78717b6f059cfe0b75e75c2ed4bb7ca65154f';
 
 async function main() {
+  // Create account from mnemonic
+  const account = mnemonicToAccount(MNEMONIC);
+  
+  console.log('Derived address:', account.address);
+  console.log('Make sure this matches your custody address!');
+
   // Create the header object
   const header = {
     fid: FID,
     type: "custody",
-    key: CUSTODY_ADDRESS,
+    signer: CUSTODY_ADDRESS,
   };
 
   // Create the payload object
@@ -21,18 +27,12 @@ async function main() {
     domain: DOMAIN,
   };
 
-  // Convert to base64
-  const headerB64 = Buffer.from(JSON.stringify(header)).toString('base64');
-  const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64');
+  // Convert to base64url (not base64)
+  const encodedHeader = Buffer.from(JSON.stringify(header)).toString('base64url');
+  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
 
   // Create the message to sign
-  const messageToSign = `${headerB64}.${payloadB64}`;
-
-  // Create account from mnemonic
-  const account = mnemonicToAccount(MNEMONIC);
-  
-  console.log('Derived address:', account.address);
-  console.log('Make sure this matches your custody address!');
+  const messageToSign = `${encodedHeader}.${encodedPayload}`;
   
   const client = createWalletClient({
     account,
@@ -45,13 +45,22 @@ async function main() {
     message: messageToSign,
   });
 
-  console.log('\nCopy these values to your farcaster.json.ts file:');
-  console.log('\nHeader:');
-  console.log(headerB64);
-  console.log('\nPayload:');
-  console.log(payloadB64);
-  console.log('\nSignature:');
-  console.log(signature);
+  // Encode signature to base64url
+  const encodedSignature = Buffer.from(signature).toString('base64url');
+
+  // Create both compact and JSON formats
+  const compactJfs = `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
+  const jsonJfs = {
+    header: encodedHeader,
+    payload: encodedPayload,
+    signature: encodedSignature
+  };
+
+  console.log('\nJSON Format (use this for your farcaster.json.ts):');
+  console.log(JSON.stringify(jsonJfs, null, 2));
+  
+  console.log('\nCompact Format:');
+  console.log(compactJfs);
 }
 
 main().catch(console.error); 
