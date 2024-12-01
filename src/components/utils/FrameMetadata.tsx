@@ -23,7 +23,7 @@ export default function FrameMetadata() {
   }, [currentPageUrl, baseUrl]);
 
   const frameEmbedMetadata = {
-    imageUrl: `${baseUrl}/images/og.gif`,
+    imageUrl: `${baseUrl}/images/logo.png`,
     button: {
       type: 'launch_frame',
       name: 'NFL Boxes',
