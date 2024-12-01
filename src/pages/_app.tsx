@@ -61,23 +61,4 @@ const MyApp: AppType<{ session: Session | null }> = ({
   );
 };
 
-
-MyApp.getInitialProps = async ({ Component, ctx }: AppContext) => {
-  const session = await getSession();
-  let pageProps = {}
-
-  if (Component.getInitialProps) {
-    pageProps = await Component.getInitialProps(ctx)
-  }
-
-  // Get the frame metadata from the response headers
-  const frameMetadata = ctx.res?.getHeader('x-frame-metadata')
-
-  return { 
-    pageProps,
-    session,
-    frameMetadata: frameMetadata || null
-  }
-}
-
 export default api.withTRPC(MyApp);

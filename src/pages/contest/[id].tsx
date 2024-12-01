@@ -27,6 +27,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   // Attach the frame metadata to the request object
   if (context.req) {
+    // @ts-ignore
     (context.req as any).frameMetadata = frameMetadata;
   }
 

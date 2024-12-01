@@ -23,6 +23,7 @@ export default function Document({ frameMetadata }: DocumentProps) {
 
 Document.getInitialProps = async (ctx: DocumentContext) => {
   const initialProps = await ctx.defaultGetInitialProps(ctx)
+  // @ts-ignore
   const frameMetadata = (ctx.req as any).frameMetadata
 
   return {
