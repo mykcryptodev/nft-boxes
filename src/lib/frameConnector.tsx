@@ -7,7 +7,7 @@ import { DEFAULT_CHAIN } from "~/constants";
 frameConnector.type = "frameConnector" as const;
 
 export function frameConnector() {
-  let connected = true;
+  let connected = false;
 
   return createConnector<typeof sdk.wallet.ethProvider>((config) => ({
     id: "farcaster",

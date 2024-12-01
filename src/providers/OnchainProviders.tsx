@@ -11,7 +11,7 @@ import {
 } from '@rainbow-me/rainbowkit/wallets';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type FC, useEffect, useState } from 'react';
-import { createConfig, http,WagmiProvider } from 'wagmi';
+import { createConfig, http,WagmiProvider, createStorage } from 'wagmi';
 import { frameConnector } from "~/lib/frameConnector";
 
 import { APP_NAME, DEFAULT_CHAIN, EAS_SCHEMA_ID, SUPPORTED_CHAINS } from '~/constants';
@@ -56,6 +56,7 @@ export const wagmiConfig = createConfig({
   chains: SUPPORTED_CHAINS,
   syncConnectedChain: true,
   transports,
+  storage: createStorage({ storage: window.localStorage }),
 });
 
 type Props = {
