@@ -23,6 +23,7 @@ export default function FrameMetadata() {
   }, [currentPageUrl, baseUrl]);
 
   const frameEmbedMetadata = {
+    version: "next",
     imageUrl: `${baseUrl}/images/logo.png`,
     button: {
       title: "Play NFL Boxes",

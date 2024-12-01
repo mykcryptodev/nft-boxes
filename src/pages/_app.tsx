@@ -32,6 +32,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   const imageUrl = `${APP_URL}/images/og.gif`;
 
   const frameEmbedMetadata = {
+    version: "next",
     imageUrl: `${APP_URL}/images/logo.png`,
     button: {
       title: "Play NFL Boxes",
