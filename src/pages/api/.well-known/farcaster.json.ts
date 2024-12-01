@@ -19,6 +19,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     frame: {
       version: "0.0.0",
       name: "NFL Boxes",
+      homeUrl: getBaseUrl(),
       iconUrl: `${getBaseUrl()}/images/icon.png`,
       splashImageUrl: `${getBaseUrl()}/images/logo.png`,
       splashBackgroundColor: "#fafafa",
