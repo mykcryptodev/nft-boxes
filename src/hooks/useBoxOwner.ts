@@ -2,26 +2,18 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { createThirdwebClient, getContract } from "thirdweb";
 import { ownerOf } from "thirdweb/extensions/erc721";
-import { getSocialProfiles, type SocialProfile } from "thirdweb/social";
 import { type Address } from "viem";
 
 import { DEFAULT_CHAIN } from "~/constants";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
-import { api } from "~/utils/api";
 
 export const useBoxOwner = (
   boxesAddress: string, 
-  tokenId: number,
-  includeThirdwebProfiles = false
+  tokenId: number
 ) => {
   const [owner, setOwner] = useState<Address | null>(null);
-  const [profiles, setProfiles] = useState<SocialProfile[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const { data: localProfile } = api.user.getIdentity.useQuery({
-    address: owner ?? "",
-  });
 
   useEffect(() => {
     setIsLoading(true);
@@ -39,18 +31,11 @@ export const useBoxOwner = (
         contract,
         tokenId: BigInt(tokenId),
       });
-      setOwner(result as Address);
-      if (includeThirdwebProfiles) {
-        const profiles = await getSocialProfiles({
-          address: result as Address,
-          client,
-        });
-        setProfiles(profiles);
-      }
+      setOwner(result);
       setIsLoading(false);
     }
     void getOwner();
-  }, [boxesAddress, includeThirdwebProfiles, tokenId]);
+  }, [boxesAddress, tokenId]);
 
-  return { owner, profiles, isLoading, localProfile };
+  return { owner, isLoading };
 }

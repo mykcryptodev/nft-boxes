@@ -1,18 +1,13 @@
-import { Avatar, useName } from "@coinbase/onchainkit/identity";
-import { type FC,useMemo } from "react";
+import { type FC } from "react";
 import { toTokens } from "thirdweb";
-import { shortenAddress } from "thirdweb/utils";
-import { base } from "viem/chains";
 
 import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { useBoxOwner } from "~/hooks/useBoxOwner";
 import { type Contest,type ScoresOnChain } from "~/types/contest";
-import { api } from "~/utils/api";
 
-import { GradientAvatar } from "../Identity/GradientAvatar";
-import { ClaimReward } from "./ClaimReward";
 import { Owner } from "../Identity/Owner";
+import { ClaimReward } from "./ClaimReward";
 
 type Props = {
   contest: Contest;
@@ -50,7 +45,7 @@ export const Winners: FC<Props> = ({ contest, scoresOnchain }) => {
   }
 
   const Winner: FC<{ tokenId: number, rewards: string, quarterIndex: number }> = ({ tokenId, rewards, quarterIndex }) => {
-    const { owner, localProfile } = useBoxOwner(contest.boxesAddress, tokenId);
+    const { owner } = useBoxOwner(contest.boxesAddress, tokenId);
 
     return (
       <div className="flex items-center justify-center">
@@ -59,7 +54,6 @@ export const Winners: FC<Props> = ({ contest, scoresOnchain }) => {
             <Owner 
               owner={owner} 
               boxId={tokenId.toString()} 
-              localProfile={localProfile} 
               boxesAddress={contest.boxesAddress} 
               showName={true}
               avatarSize={12}
