@@ -51,7 +51,7 @@ export const identityRouter = createTRPCRouter({
       const image = profiles.find(p => p.avatar?.startsWith('https://') && !KNOWN_BROKEN_IMAGES[p.avatar])?.avatar;
       const bio = profiles.find(p => p.bio)?.bio;
 
-      if (existingIdentity?.name !== name || existingIdentity?.image !== image) {
+      if (existingIdentity && (existingIdentity.name !== name || existingIdentity.image !== image)) {
         // update the existing identity
         await ctx.db.user.update({
           where: { address: input.address },

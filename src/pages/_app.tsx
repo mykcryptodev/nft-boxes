@@ -1,8 +1,8 @@
-import { AppContext, type AppType } from "next/app";
+import { type AppType } from "next/app";
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { type Session } from "next-auth";
-import { getSession, SessionProvider } from "next-auth/react";
+import { SessionProvider } from "next-auth/react";
 import { ToastContainer } from 'react-toastify';
 
 import Layout from "~/components/utils/Layout";
