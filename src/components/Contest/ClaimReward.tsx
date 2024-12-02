@@ -1,7 +1,6 @@
 import { type LifecycleStatus, Transaction, TransactionButton, TransactionToast, TransactionToastAction, TransactionToastIcon, TransactionToastLabel } from '@coinbase/onchainkit/transaction';
 import { type FC,useCallback, useMemo } from "react";
 import { createThirdwebClient, encode, getContract } from 'thirdweb';
-import { type Address } from 'viem';
 
 import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from '~/constants/addresses';

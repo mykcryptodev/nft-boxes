@@ -1,5 +1,6 @@
 import { coingeckoRouter } from "~/server/api/routers/coingecko";
 import { gameRouter } from "~/server/api/routers/game";
+import { identityRouter } from "~/server/api/routers/identity";
 import { safetyRouter } from "~/server/api/routers/safety";
 import { userRouter } from "~/server/api/routers/user";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
@@ -14,11 +15,11 @@ export const appRouter = createTRPCRouter({
   coingecko: coingeckoRouter,
   safety: safetyRouter,
   user: userRouter,
+  identity: identityRouter,
 });
 
 // export type definition of API
 export type AppRouter = typeof appRouter;
-
 /**
  * Create a server-side caller for the tRPC API.
  * @example
@@ -27,3 +28,4 @@ export type AppRouter = typeof appRouter;
  *       ^? Post[]
  */
 export const createCaller = createCallerFactory(appRouter);
+
