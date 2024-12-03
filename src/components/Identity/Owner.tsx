@@ -1,9 +1,8 @@
 import { Socials } from "@coinbase/onchainkit/identity";
 import { ArrowTopRightOnSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { type User } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
-import { type FC,useState } from "react";
+import { type FC } from "react";
 import { shortenAddress } from "thirdweb/utils";
 import { type Address } from "viem";
 import { base } from "viem/chains";
@@ -23,8 +22,7 @@ type Props = {
   avatarSize?: number;
 }
 export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarSize = 6 }) => {
-  const [hasTriedFetching, setHasTriedFetching] = useState<boolean>(false);
-  const { data: identity, isLoading, refetch } = api.identity.getOrFetchIdentity.useQuery({
+  const { data: identity, isLoading } = api.identity.getOrFetchIdentity.useQuery({
     address: owner ?? ''
   }, {
     enabled: !!owner,
@@ -55,12 +53,6 @@ export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarS
                 alt={identity?.name ?? shortenAddress(owner)}
                 width={48}
                 height={48}
-                onError={() => {
-                  if (!hasTriedFetching) {
-                    setHasTriedFetching(true);
-                    void refetch();
-                  }
-                }}
               />
             </div>
           </div>
