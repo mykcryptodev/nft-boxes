@@ -103,7 +103,7 @@ export const ContestForm: FC = () => {
   const [boxCurrency, setBoxCurrency] = useState<Token>(ETH_TOKEN);
   const season = watch("season");
   const numWeeks = useMemo(() => {
-    const weeksInRegularSeason = 17;
+    const weeksInRegularSeason = 18;
     const weeksInPreseason = 4;
     const weeksInPostseason = 5;
     switch (Number(season)) {
