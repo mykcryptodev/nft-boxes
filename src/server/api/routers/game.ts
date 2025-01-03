@@ -75,7 +75,6 @@ export const gameRouter = createTRPCRouter({
       const response = await fetch(`${ESPN_BASE_URL}/scoreboard?week=${input.week}&seasontype=${input.season}`, {
         next: { revalidate: 60 } // revalidate every minute
       });
-      console.log({ response })
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -83,7 +82,6 @@ export const gameRouter = createTRPCRouter({
         events: EventsResponse;
       };
       const data = await response.json() as EspnApiResponse;
-      console.log({ data });
       return data;
     }),
   getCurrentWeek: publicProcedure

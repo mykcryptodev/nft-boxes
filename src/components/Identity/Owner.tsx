@@ -3,6 +3,7 @@ import { ArrowTopRightOnSquareIcon, XMarkIcon } from "@heroicons/react/24/outlin
 import Image from "next/image";
 import Link from "next/link";
 import { type FC } from "react";
+import { Blobbie } from "thirdweb/react";
 import { shortenAddress } from "thirdweb/utils";
 import { type Address } from "viem";
 import { base } from "viem/chains";
@@ -11,8 +12,6 @@ import { Portal } from "~/components/utils/Portal";
 import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { api } from "~/utils/api";
-
-import { GradientAvatar } from "./GradientAvatar";
 
 type Props = {
   owner: Address | null;
@@ -32,7 +31,7 @@ export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarS
     return (
       <div className={`avatar w-${avatarSize} h-${avatarSize}`}>
         <div className="rounded-full">
-          <GradientAvatar address={owner ?? ""} className="w-full h-full" />
+          <Blobbie address={owner ?? ""} className="w-full h-full" />
         </div>
       </div>
     )

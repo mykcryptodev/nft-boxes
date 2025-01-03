@@ -16,9 +16,8 @@ import {
 } from '@coinbase/onchainkit/wallet';
 import { signOut, useSession } from 'next-auth/react';
 import { useEffect } from 'react';
+import { Blobbie } from "thirdweb/react";
 import { useAccount } from "wagmi";
-
-import { GradientAvatar } from '../Identity/GradientAvatar';
 
 type Props = {
   btnLabel?: string;
@@ -38,16 +37,16 @@ export function Wallet({ btnLabel, withWalletAggregator }: Props) {
   return (
     <div className="flex gap-2 items-center">
       <WalletComponent>
-        <ConnectWallet withWalletAggregator={withWalletAggregator} text={btnLabel}>
+        <ConnectWallet text={btnLabel}>
           <Avatar className="h-6 w-6" defaultComponent={
-            <GradientAvatar address={address ?? ""} className="w-full h-full" />
+            <Blobbie address={address ?? ""} className="w-full h-full" />
           } />
           <Name />
         </ConnectWallet>
         <WalletDropdown>
           <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
             <Avatar defaultComponent={
-              <GradientAvatar address={address ?? ""} className="w-full h-full" />
+              <Blobbie address={address ?? ""} className="w-full h-full" />
             }/>
             <Name />
             <Address className={color.foregroundMuted} />
