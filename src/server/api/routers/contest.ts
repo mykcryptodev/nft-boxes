@@ -36,6 +36,9 @@ export const contestRouter = createTRPCRouter({
         (_, i) => Number(totalContests) - 1 - (start + i)
       );
 
-      return contestIds.map(id => id.toString());
+      return {
+        ids: contestIds.map(id => id.toString()),
+        total: Number(totalContests),
+      };
     }),
 });

@@ -6,12 +6,13 @@ import { shortenAddress, toTokens } from "thirdweb/utils";
 
 import useContest from "~/hooks/useContest";
 import { api } from "~/utils/api";
+
+const PAGE_SIZE = 10;
 export const ContestList: FC = () => {
   const router = useRouter();
-  const [limit, setLimit] = useState(10);
-  const { data, isLoading } = api.contest.list.useQuery({
-    start: 0,
-    limit: limit,
+  const [start, setStart] = useState(0);
+  const { data } = api.contest.list.useQuery({
+    start,
   });
 
   const TableRow = ({contestId}: {contestId: string}) => {
@@ -134,14 +135,38 @@ export const ContestList: FC = () => {
             </tr>
           </thead>
           <tbody>
-            {data?.map((contestId) => (
+            {data?.ids.map((contestId) => (
               <TableRow key={contestId} contestId={contestId} />
             ))}
           </tbody>
         </table>
       </div>
-      <div className="flex justify-center mt-8">
-        <button className="btn btn-sm btn-outline" onClick={() => setLimit(limit + 10)}>Load More</button>
+      <div className="flex w-full justify-center mt-8">
+        <div className="join">
+          <button
+            className="join-item btn"
+            onClick={() => setStart(Math.max(0, start - PAGE_SIZE))}
+            disabled={start === 0}
+          >
+            «
+          </button>
+          {Array.from({length: Math.ceil((data?.total ?? 0) / PAGE_SIZE)}, (_, i) => (
+            <button 
+              key={i}
+              className={`join-item btn ${Math.floor(start / PAGE_SIZE) === i ? 'btn-active' : ''}`}
+              onClick={() => setStart(i * PAGE_SIZE)}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            className="join-item btn"
+            onClick={() => setStart(Math.min((Math.ceil((data?.total ?? 0) / PAGE_SIZE) - 1) * PAGE_SIZE, start + PAGE_SIZE))}
+            disabled={start >= Math.floor((data?.total ?? 0) / PAGE_SIZE) * PAGE_SIZE}
+          >
+            »
+          </button>
+        </div>
       </div>
     </div>
   )
