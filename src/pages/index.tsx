@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useAccount } from "wagmi";
 
+import ContestList from "~/components/Contest/List";
 import { Wallet } from "~/components/Wallet";
 import { APP_DESCRIPTION, APP_NAME } from "~/constants";
 
@@ -28,6 +29,7 @@ export default function Home() {
               Create Contest
             </Link>
           )}
+          <ContestList />
         </div>
       </main>
     </>

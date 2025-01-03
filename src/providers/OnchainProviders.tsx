@@ -12,6 +12,7 @@ import {
 } from '@rainbow-me/rainbowkit/wallets';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type FC, useEffect, useState } from 'react';
+import { ThirdwebProvider } from 'thirdweb/react';
 import { createConfig, http,WagmiProvider } from 'wagmi';
 
 import { APP_NAME, DEFAULT_CHAIN, EAS_SCHEMA_ID, SUPPORTED_CHAINS } from '~/constants';
@@ -88,19 +89,21 @@ const OnchainProviders: FC<Props> = ({ children }) => {
   }
 
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <OnchainKitProvider
-          apiKey={env.NEXT_PUBLIC_CDP_API_KEY}
-          chain={DEFAULT_CHAIN}
-          schemaId={EAS_SCHEMA_ID}
-        >
-          <RainbowKitProvider modalSize="compact">
-            {children}
-          </RainbowKitProvider>
-        </OnchainKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ThirdwebProvider>
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <OnchainKitProvider
+            apiKey={env.NEXT_PUBLIC_CDP_API_KEY}
+            chain={DEFAULT_CHAIN}
+            schemaId={EAS_SCHEMA_ID}
+          >
+            <RainbowKitProvider modalSize="compact">
+              {children}
+            </RainbowKitProvider>
+          </OnchainKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </ThirdwebProvider>
   );
 } 
  
