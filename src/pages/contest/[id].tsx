@@ -1,6 +1,7 @@
-import { GetServerSideProps } from 'next'
-import { APP_URL } from '~/constants'
+import { type GetServerSideProps } from 'next'
+
 import Contest from '~/components/Contest';
+import { APP_URL } from '~/constants'
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.query;

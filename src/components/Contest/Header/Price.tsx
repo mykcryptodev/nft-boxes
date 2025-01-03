@@ -1,3 +1,4 @@
+import { Buy } from '@coinbase/onchainkit/buy'; 
 import { FundButton } from "@coinbase/onchainkit/fund";
 import { SwapDefault } from "@coinbase/onchainkit/swap";
 import Image from "next/image";
@@ -10,6 +11,7 @@ import { useAccount,useBalance } from 'wagmi';
 
 import { DEFAULT_TOKENS } from "~/constants/tokens";
 import { type Contest } from "~/types/contest";
+
 
 type Props = {
   contest: Contest;
@@ -102,9 +104,23 @@ export const Price: FC<Props> = ({ contest, onSwapToggle }) => {
         <div className="drawer-side">
           <label htmlFor="swap-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
           <div className={`bg-base-200 min-h-full w-5/6 p-4 flex flex-col gap-2 items-center justify-center`}>
+            <div className="text-4xl font-bold mb-2">Buy</div>
+            <p>Buy with services like Coinbase and Apple Pay</p>
+            <Buy
+              toToken={{
+                address: contest.boxCost.currency,
+                chainId: base.id,
+                decimals: contest.boxCost.decimals,
+                name: contest.boxCost.name,
+                symbol: contest.boxCost.symbol,
+                image: contest.boxCost.image,
+              }}
+            />
+            <p className="text-sm opacity-75">The cost per box is {toTokens(contest.boxCost.amount, contest.boxCost.decimals)} {contest.boxCost.symbol} </p>
+            <div className="divider" />
             <div className="text-4xl font-bold mb-2">Fund</div>
             <FundButton />
-            <div className="divider" />
+            <div className="my-1" />
             <div className="text-4xl font-bold mb-2">Swap</div>
             <SwapDefault
               from={DEFAULT_TOKENS}

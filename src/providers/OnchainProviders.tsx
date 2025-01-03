@@ -1,4 +1,5 @@
 import { OnchainKitProvider } from '@coinbase/onchainkit';
+import sdk, { type FrameContext } from '@farcaster/frame-sdk';
 import {
   connectorsForWallets,
   RainbowKitProvider,
@@ -12,14 +13,13 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type FC, useEffect, useState } from 'react';
 import { createConfig, http,WagmiProvider } from 'wagmi';
-import { frameConnector } from "~/lib/frameConnector";
 
 import { APP_NAME, DEFAULT_CHAIN, EAS_SCHEMA_ID, SUPPORTED_CHAINS } from '~/constants';
 import { env } from '~/env';
+import { frameConnector } from "~/lib/frameConnector";
 
 import '@coinbase/onchainkit/styles.css';
 import '@rainbow-me/rainbowkit/styles.css';
-import sdk, { type FrameContext } from '@farcaster/frame-sdk';
 
 const queryClient = new QueryClient();
  
