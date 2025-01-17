@@ -43,7 +43,7 @@ export const ContestList: FC = () => {
         <td>
           <div className="bg-base-300 animate-pulse rounded h-6 w-6" />
         </td>
-        <td>
+        <td className="min-w-[160px]">
           <div className="flex flex-col items-center gap-1 text-center">
             <div className="bg-base-300 animate-pulse rounded h-6 w-24" />
             <div className="bg-base-300 animate-pulse rounded h-6 w-32" />
@@ -68,7 +68,7 @@ export const ContestList: FC = () => {
     return (
       <tr key={contestId} className="cursor-pointer" onClick={() => router.push(`/contest/${contestId}`)}>
         <td>{contestId}</td>
-        <td>
+        <td className="min-w-[160px]">
           <div className="flex flex-col items-center gap-0 text-center">
             <div className="text-sm flex items-center gap-1">
               <div>{game.shortName}</div>
@@ -107,9 +107,13 @@ export const ContestList: FC = () => {
         <td>
           <div className="flex items-center gap-1">
             <div>{toTokens(contest.boxCost.amount, contest.boxCost.decimals)}</div>
-            <div>
-              <Image src={contest.boxCost.image} alt={contest.boxCost.symbol} width={16} height={16} />
-            </div>
+            <Image 
+              src={contest.boxCost.image} 
+              alt={contest.boxCost.symbol} 
+              width={16} 
+              height={16}
+              className="w-4 h-4"
+            />
             <div>{contest.boxCost.symbol}</div>
           </div>
         </td>
@@ -121,7 +125,7 @@ export const ContestList: FC = () => {
   }
 
   return (
-    <div className="w-100">
+    <div className="w-full overflow-x-auto">
       <h1 className="text-2xl font-bold">Join a Contest</h1>
       <div className="overflow-x-auto">
         <table className="table">
