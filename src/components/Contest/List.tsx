@@ -121,7 +121,7 @@ export const ContestList: FC = () => {
   }
 
   return (
-    <div>
+    <div className="w-100">
       <h1 className="text-2xl font-bold">Join a Contest</h1>
       <div className="overflow-x-auto">
         <table className="table">
