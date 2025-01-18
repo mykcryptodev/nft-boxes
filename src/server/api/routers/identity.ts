@@ -18,6 +18,7 @@ export const identityRouter = createTRPCRouter({
       address: z.string(),
     }))
     .query(async ({ ctx, input }) => {
+      console.log('getOrFetchIdentity', input.address);
       if (!isAddress(input.address)) {
         throw new Error("Invalid address");
       }
@@ -40,29 +41,35 @@ export const identityRouter = createTRPCRouter({
         clientId: env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
       });
 
-      const profiles = await getSocialProfiles({
-        address: input.address,
-        client,
-      });
-
-      const basename = await getName({ address: input.address, chain: base });
+      const [profiles, basename] = await Promise.all([
+        getSocialProfiles({
+          address: input.address,
+          client,
+        }),
+        getName({ address: input.address, chain: base })
+      ]);
 
       const name = basename ?? profiles.find(p => p.name)?.name;
       const image = profiles.find(p => p.avatar?.startsWith('https://') && !KNOWN_BROKEN_IMAGES[p.avatar])?.avatar;
       const bio = profiles.find(p => p.bio)?.bio;
 
-      if (existingIdentity && (existingIdentity.name !== name || existingIdentity.image !== image)) {
-        // update the existing identity
-        await ctx.db.user.update({
-          where: { address: input.address },
-          data: { name, image, bio },
-        });
+      const thereAreChanges = () => {
+        return existingIdentity && (
+          (existingIdentity.name ?? null) !== (name ?? null) || 
+          (existingIdentity.image ?? null) !== (image ?? null) || 
+          (existingIdentity.bio ?? null) !== (bio ?? null)
+        );
       }
 
-      // If not found and we have new data, create a new record
-      if (name || image || bio) {
-        const newIdentity = await ctx.db.user.create({
-          data: {
+      if (thereAreChanges()) {
+        const newIdentity = await ctx.db.user.upsert({
+          where: { address: input.address },
+          update: {
+            name,
+            image,
+            bio,
+          },
+          create: {
             address: input.address,
             name,
             image,
