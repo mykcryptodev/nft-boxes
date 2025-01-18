@@ -2,7 +2,7 @@ import { Socials } from "@coinbase/onchainkit/identity";
 import { ArrowTopRightOnSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { type FC } from "react";
+import { type FC,useState } from "react";
 import { Blobbie } from "thirdweb/react";
 import { shortenAddress } from "thirdweb/utils";
 import { type Address } from "viem";
@@ -26,6 +26,7 @@ export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarS
   }, {
     enabled: !!owner,
   });
+  const [isError, setIsError] = useState(false);
 
   if (isLoading) {
     return (
@@ -44,15 +45,19 @@ export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarS
         className={"cursor-pointer flex flex-col items-center"}
       >
         {owner && owner !== CONTEST_CONTRACT[DEFAULT_CHAIN.id] ? (
-          // <Avatar className={`w-${avatarSize} h-${avatarSize}`} address={owner} defaultComponent={OwnerAvatarComponent} />
           <div className={`avatar w-${avatarSize} h-${avatarSize}`}>
             <div className="rounded-full">
-              <Image
-                src={identity?.image ?? ''}
-                alt={identity?.name ?? shortenAddress(owner)}
-                width={48}
-                height={48}
-              />
+              {isError ? (
+                <Blobbie address={owner} className="w-full h-full" />
+              ) : (
+                <Image
+                  src={identity?.image ?? ''}
+                  alt={identity?.name ?? shortenAddress(owner)}
+                  width={48}
+                  height={48}
+                  onError={() => setIsError(true)}
+                />
+              )}
             </div>
           </div>
         ) : null}
@@ -68,15 +73,19 @@ export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarS
               <XMarkIcon className="w-4 h-4 stroke-2" />
             </label>
             <h3 className="text-2xl font-bold flex items-center gap-2">
-              {/* <Avatar className="w-12 h-12" address={owner} defaultComponent={OwnerAvatarComponent} /> */}
               <div className="avatar w-12 h-12">
                 <div className="rounded-full">
-                  <Image
-                    src={identity?.image ?? ''}
-                    alt={identity?.name ?? shortenAddress(owner!)}
-                    width={48}
-                    height={48}
-                  />
+                  {isError ? (
+                    <Blobbie address={owner ?? ''} className="w-full h-full" />
+                  ) : (
+                    <Image
+                      src={identity?.image ?? ''}
+                      alt={identity?.name ?? shortenAddress(owner!)}
+                      width={48}
+                      height={48}
+                      onError={() => setIsError(true)}
+                    />
+                  )}
                 </div>
               </div>
               <div className="flex flex-col">

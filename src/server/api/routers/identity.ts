@@ -18,6 +18,7 @@ export const identityRouter = createTRPCRouter({
       address: z.string(),
     }))
     .query(async ({ ctx, input }) => {
+      console.log('getOrFetchIdentity', input.address);
       if (!isAddress(input.address)) {
         throw new Error("Invalid address");
       }
@@ -61,8 +62,14 @@ export const identityRouter = createTRPCRouter({
 
       // If not found and we have new data, create a new record
       if (name || image || bio) {
-        const newIdentity = await ctx.db.user.create({
-          data: {
+        const newIdentity = await ctx.db.user.upsert({
+          where: { address: input.address },
+          update: {
+            name,
+            image,
+            bio,
+          },
+          create: {
             address: input.address,
             name,
             image,
