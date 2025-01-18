@@ -1,3 +1,4 @@
+import { Buy } from "@coinbase/onchainkit/buy";
 import { FundButton } from "@coinbase/onchainkit/fund";
 import { SwapDefault } from "@coinbase/onchainkit/swap";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
@@ -24,11 +25,27 @@ export const Fund: NextPage<Props> = ({ address, decimals, name, symbol, image, 
         Back to Contest
       </Link>
       <div className={`my-8 p-4 flex flex-col gap-2 items-center justify-center`}>
-        <div className="text-4xl font-bold mb-2">Fund</div>
+        <div className="text-4xl font-bold">Buy</div>
+        <p className="mb-2 text-center text-sm">Buy with services like Coinbase and Apple Pay</p>
+        <Buy
+          toToken={{
+            address,
+            chainId: base.id,
+            decimals,
+            name,
+            symbol,
+            image,
+          }}
+        />
+        <div className="divider">OR</div>
+        <div className="text-4xl font-bold">Fund</div>
+        <p className="mb-2 text-center text-sm">Fund your wallet to execute swaps</p>
         <FundButton />
-        <div className="divider" />
-        <div className="text-4xl font-bold mb-2">Swap</div>
+        <div className="mb-2" />
+        <div className="text-4xl font-bold">Swap</div>
+        <p className="mb-2 text-center text-sm">Swap to {symbol}</p>
         <SwapDefault
+          className="sm:max-w-full max-w-[300px]"
           from={DEFAULT_TOKENS}
           to={[{
             address,

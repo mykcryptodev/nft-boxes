@@ -117,7 +117,7 @@ export const Price: FC<Props> = ({ contest, onSwapToggle }) => {
               }}
             />
             <p className="text-sm opacity-75">The cost per box is {toTokens(contest.boxCost.amount, contest.boxCost.decimals)} {contest.boxCost.symbol} </p>
-            <div className="divider" />
+            <div className="divider">OR</div>
             <div className="text-4xl font-bold">Fund</div>
             <p className="mb-2">Fund your wallet to execute swaps</p>
             <FundButton />
