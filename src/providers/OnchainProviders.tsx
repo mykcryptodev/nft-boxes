@@ -2,9 +2,8 @@ import { OnchainKitProvider } from '@coinbase/onchainkit';
 import sdk, { type FrameContext } from '@farcaster/frame-sdk';
 import { type FC, useEffect, useState } from 'react';
 import { ThirdwebProvider } from 'thirdweb/react';
-import { type Config, createConfig, http, WagmiProvider } from 'wagmi';
+import { createConfig, http, WagmiProvider } from 'wagmi';
 import { coinbaseWallet, metaMask, walletConnect } from 'wagmi/connectors';
-import { create } from 'zustand';
 
 import { APP_NAME, DEFAULT_CHAIN, EAS_SCHEMA_ID, SUPPORTED_CHAINS } from '~/constants';
 import { env } from '~/env';
@@ -18,37 +17,27 @@ const transports = SUPPORTED_CHAINS.reduce<Record<number, ReturnType<typeof http
   return acc;
 }, {});
 
-const defaultConnectors = [
-  coinbaseWallet({
-    appName: APP_NAME,
-    appLogoUrl: "/images/logo.png",
-  }),
-  metaMask({
-    dappMetadata: {
-      name: APP_NAME,
-    },
-  }),
-  walletConnect({
-    projectId: env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
-  }),
-  frameConnector(),
-];
-
-interface WagmiStore {
-  config: Config | null;
-  setConfig: (config: Config) => void;
-}
-
-export const useWagmiStore = create<WagmiStore>((set) => ({
-  config: createConfig({
-    chains: [DEFAULT_CHAIN],
-    connectors: defaultConnectors,
-    ssr: true,
-    transports,
-    syncConnectedChain: true,
-  }),
-  setConfig: (config) => set({ config }),
-}));
+export const wagmiConfig = createConfig({
+  chains: [DEFAULT_CHAIN],
+  connectors: [
+    coinbaseWallet({
+      appName: APP_NAME,
+      appLogoUrl: "/images/logo.png",
+    }),
+    metaMask({
+      dappMetadata: {
+        name: APP_NAME,
+      },
+    }),
+    walletConnect({
+      projectId: env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
+    }),
+    frameConnector(),
+  ],
+  ssr: true,
+  transports,
+  syncConnectedChain: true,
+});
 
 type Props = {
   children: React.ReactNode;
@@ -57,32 +46,20 @@ type Props = {
 const OnchainProviders: FC<Props> = ({ children }) => {
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [isFrameLoaded, setIsFrameLoaded] = useState<boolean>(false);
-  const [, setFrameContext] = useState<FrameContext>();
-  const { setConfig } = useWagmiStore();
-  const { config } = useWagmiStore();
+  const [frameContext, setFrameContext] = useState<FrameContext>();
+  console.log({ frameContext });
 
   useEffect(() => {
     const load = async () => {
       const context = await sdk.context;
       setFrameContext(context);
       await sdk.actions.ready();
-      
-      // Update wagmi config based on frame context
-      if (context) {
-        setConfig(createConfig({
-          chains: [DEFAULT_CHAIN],
-          connectors: [frameConnector()],
-          ssr: true,
-          transports,
-          syncConnectedChain: true,
-        }));
-      }
     };
     if (sdk && !isFrameLoaded) {
       setIsFrameLoaded(true);
       void load();
     }
-  }, [isFrameLoaded, setConfig]);
+  }, [isFrameLoaded]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -92,11 +69,9 @@ const OnchainProviders: FC<Props> = ({ children }) => {
     return null;
   }
 
-  if (!config) return null;
-
   return (
     <ThirdwebProvider>
-      <WagmiProvider config={config}>
+      <WagmiProvider config={wagmiConfig}>
         <OnchainKitProvider
           apiKey={env.NEXT_PUBLIC_CDP_API_KEY}
           chain={DEFAULT_CHAIN}

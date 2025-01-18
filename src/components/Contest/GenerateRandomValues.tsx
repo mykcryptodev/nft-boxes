@@ -9,7 +9,7 @@ import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
-import { useWagmiStore } from "~/providers/OnchainProviders";
+import { wagmiConfig } from "~/providers/OnchainProviders";
 import { fetchRandomValues } from "~/thirdweb/84532/0x7bbc05e8e8eada7845fa106dfd3fc41a159b90f5";
 import { type Contest } from "~/types/contest";
 
@@ -21,7 +21,6 @@ type Props = {
 export const GenerateRandomValues: FC<Props> = ({ contest, onValuesGenerated }) => {
   const [showWaitingInfo, setShowWaitingInfo] = useState<boolean>(false);
   const toastShown = useRef<boolean>(false);
-  const { config } = useWagmiStore();
 
   const handleOnStatus = useCallback((status: LifecycleStatus) => {
     if (status.statusName === 'success') {
@@ -29,7 +28,7 @@ export const GenerateRandomValues: FC<Props> = ({ contest, onValuesGenerated }) 
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const unwatch = watchContractEvent(config!, {
+  const unwatch = watchContractEvent(wagmiConfig, {
     address: CONTEST_CONTRACT[DEFAULT_CHAIN.id]!,
     abi: [
       {
