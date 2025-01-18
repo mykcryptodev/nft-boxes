@@ -15,7 +15,7 @@ import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { ETH_TOKEN } from "~/constants/tokens";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
-import { wagmiConfig } from "~/providers/OnchainProviders";
+import { useWagmiStore } from "~/providers/OnchainProviders";
 import { createContest } from "~/thirdweb/84532/0x7bbc05e8e8eada7845fa106dfd3fc41a159b90f5";
 import { api } from "~/utils/api";
 
@@ -40,6 +40,7 @@ export const ContestForm: FC = () => {
   const { data: currentWeek } = api.game.getCurrentWeek.useQuery();
   const { data: currentSeason } = api.game.getCurrentSeason.useQuery();
   const { address } = useAccount();
+  const { config } = useWagmiStore();
   const { register, handleSubmit, watch, reset } = useForm<FormInput>({
     defaultValues: {
       gameId: '',
@@ -51,7 +52,7 @@ export const ContestForm: FC = () => {
   const handleOnStatus = useCallback((status: LifecycleStatus) => {
     console.log('LifecycleStatus', status);
   }, []);
-  const unwatch = watchContractEvent(wagmiConfig, {
+  const unwatch = watchContractEvent(config!, {
     address: CONTEST_CONTRACT[DEFAULT_CHAIN.id]!,
     abi: [
       {

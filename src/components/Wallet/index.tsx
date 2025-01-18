@@ -21,9 +21,8 @@ import { useAccount } from "wagmi";
 
 type Props = {
   btnLabel?: string;
-  withWalletAggregator?: boolean;
 }
-export function Wallet({ btnLabel, withWalletAggregator }: Props) {
+export function Wallet({ btnLabel }: Props) {
   const { isDisconnected, address } = useAccount();
   const { data: sessionData } = useSession();
 
@@ -45,9 +44,12 @@ export function Wallet({ btnLabel, withWalletAggregator }: Props) {
         </ConnectWallet>
         <WalletDropdown>
           <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-            <Avatar defaultComponent={
-              <Blobbie address={address ?? ""} className="w-full h-full" />
-            }/>
+            <Avatar 
+              className="rounded-full"
+              defaultComponent={
+                <Blobbie address={address ?? ""} className="w-full h-full" />
+              }
+            />
             <Name />
             <Address className={color.foregroundMuted} />
             <EthBalance />

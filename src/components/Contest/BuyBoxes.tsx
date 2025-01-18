@@ -1,11 +1,9 @@
-import { FundButton } from '@coinbase/onchainkit/fund';
 import { type LifecycleStatus, Transaction, TransactionButton, TransactionToast, TransactionToastAction, TransactionToastIcon, TransactionToastLabel } from '@coinbase/onchainkit/transaction';
-import { CheckIcon,DocumentDuplicateIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import Image from 'next/image';
 import Link from 'next/link';
 import { type Call } from 'node_modules/@coinbase/onchainkit/esm/transaction/types';
 import { type FC,useCallback,useEffect, useMemo, useState } from "react";
-import { toast } from "react-toastify";
 import { createThirdwebClient, encode, getContract, toTokens } from 'thirdweb';
 import { approve } from 'thirdweb/extensions/erc20';
 import { getWalletBalance } from "thirdweb/wallets";

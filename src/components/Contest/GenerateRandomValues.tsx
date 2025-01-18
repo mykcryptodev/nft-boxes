@@ -1,6 +1,6 @@
 import { type LifecycleStatus, Transaction, TransactionButton } from "@coinbase/onchainkit/transaction";
 import { watchContractEvent } from '@wagmi/core'
-import { Call } from "node_modules/@coinbase/onchainkit/esm/transaction/types";
+import { type Call } from "node_modules/@coinbase/onchainkit/esm/transaction/types";
 import { type FC,useCallback, useRef, useState } from "react";
 import { createThirdwebClient, encode, getContract } from "thirdweb";
 import { useReadContract } from "wagmi";
@@ -9,7 +9,7 @@ import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
-import { wagmiConfig } from "~/providers/OnchainProviders";
+import { useWagmiStore } from "~/providers/OnchainProviders";
 import { fetchRandomValues } from "~/thirdweb/84532/0x7bbc05e8e8eada7845fa106dfd3fc41a159b90f5";
 import { type Contest } from "~/types/contest";
 
@@ -21,6 +21,7 @@ type Props = {
 export const GenerateRandomValues: FC<Props> = ({ contest, onValuesGenerated }) => {
   const [showWaitingInfo, setShowWaitingInfo] = useState<boolean>(false);
   const toastShown = useRef<boolean>(false);
+  const { config } = useWagmiStore();
 
   const handleOnStatus = useCallback((status: LifecycleStatus) => {
     if (status.statusName === 'success') {
@@ -28,7 +29,7 @@ export const GenerateRandomValues: FC<Props> = ({ contest, onValuesGenerated }) 
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const unwatch = watchContractEvent(wagmiConfig, {
+  const unwatch = watchContractEvent(config!, {
     address: CONTEST_CONTRACT[DEFAULT_CHAIN.id]!,
     abi: [
       {

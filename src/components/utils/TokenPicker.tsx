@@ -1,7 +1,7 @@
 import { getTokens } from '@coinbase/onchainkit/api';
 import { type Token,TokenChip, TokenRow, TokenSearch } from "@coinbase/onchainkit/token";
 import { type FC,useCallback, useState } from "react";
-import { type Address,erc20Abi, formatUnits, zeroAddress } from "viem";
+import { erc20Abi, formatUnits, zeroAddress } from "viem";
 import { base } from "viem/chains";
 import { useAccount,useReadContract } from "wagmi";
 
@@ -42,7 +42,7 @@ export const TokenPicker: FC<Props> = ({ onTokenSelected, selectedToken, id, cla
   const TokenOption: FC<{ token: Token }> = ({ token }) => {
     const { data: balance } = useReadContract({
       abi: erc20Abi,
-      address: token.address as Address,
+      address: token.address,
       functionName: "balanceOf",
       args: [address ?? zeroAddress],
     });
