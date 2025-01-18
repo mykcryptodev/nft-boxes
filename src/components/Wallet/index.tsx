@@ -45,7 +45,6 @@ export function Wallet({ btnLabel }: Props) {
         <WalletDropdown>
           <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
             <Avatar 
-              className="rounded-full"
               defaultComponent={
                 <Blobbie address={address ?? ""} className="w-full h-full" />
               }

@@ -31,7 +31,7 @@ export const Layout: FC<Props> = ({ children }) => {
             <HowToPlay />
             {/* user is not connected with their wallet */}
             {!address && (
-              <Wallet withWalletAggregator />
+              <Wallet />
             )}
             {/* user is connected but not signed in
             {address && !sessionData?.user && (
@@ -40,7 +40,7 @@ export const Layout: FC<Props> = ({ children }) => {
             {/* user is connected and signed in */}
             {/* {address && sessionData?.user && ( */}
             {address && (
-              <Wallet withWalletAggregator />
+              <Wallet />
             )}
           </div>
         </div>
