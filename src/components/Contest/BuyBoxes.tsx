@@ -1,7 +1,9 @@
 import { FundButton } from '@coinbase/onchainkit/fund';
 import { type LifecycleStatus, Transaction, TransactionButton, TransactionToast, TransactionToastAction, TransactionToastIcon, TransactionToastLabel } from '@coinbase/onchainkit/transaction';
 import { CheckIcon,DocumentDuplicateIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Call } from 'node_modules/@coinbase/onchainkit/esm/transaction/types';
+import Image from 'next/image';
+import Link from 'next/link';
+import { type Call } from 'node_modules/@coinbase/onchainkit/esm/transaction/types';
 import { type FC,useCallback,useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { createThirdwebClient, encode, getContract, toTokens } from 'thirdweb';
@@ -101,10 +103,20 @@ export const BuyBoxes: FC<Props> = ({ contest, selectedBoxes, setSelectedBoxes, 
     }, [address, contest.boxCost.currency, contest.boxesAddress]);
 
     const hasEnoughBalance = balance >= contest.boxCost.amount * BigInt(selectedBoxes.length);
+
+    const buyQueryParams = new URLSearchParams({
+        address: contest.boxCost.currency,
+        decimals: contest.boxCost.decimals.toString(),
+        name: contest.boxCost.name,
+        symbol: contest.boxCost.symbol,
+        image: contest.boxCost.image,
+        contestId: contest.id.toString(),
+    }).toString();
+
     return (
         <>
         {address && !hasEnoughBalance && selectedBoxes.length > 0 && (
-            <div className="btm-nav sm:h-2/6 h-1/2 bg-base-300 slide-up">
+            <div className="btm-nav h-1/2 bg-base-300 slide-up">
               <div className="flex flex-col gap-2">
                 <div className="flex justify-end w-full max-w-sm">
                   <button
@@ -116,61 +128,47 @@ export const BuyBoxes: FC<Props> = ({ contest, selectedBoxes, setSelectedBoxes, 
                     <XMarkIcon className="w-4 h-4 stroke-2" />
                   </button>
                 </div>
-                <div>You do not have enough CURRENCY to claim these boxes.</div>
+                <div className="text-center">You do not have enough {contest.boxCost.name ?? contest.boxCost.symbol} to claim these boxes.</div>
                 <div className="stats shadow">
                   <div className="stat">
                     <div className="stat-figure text-primary">
-                      Token Image
+                      <Image
+                        src={contest.boxCost.image}
+                        alt={contest.boxCost.symbol}
+                        width={48}
+                        height={48}
+                      />
                     </div>
                     <div className="stat-title">Your Balance</div>
                     <div className="stat-value">
-                      User Balance
+                      {toTokens(balance, contest.boxCost.decimals)}
                     </div>
                     <div className="stat-desc">
-                      CURRENCY NAME
+                      ${contest.boxCost.symbol}
                     </div>
                   </div>
                   <div className="stat">
                     <div className="stat-figure">
-                      Token Image
+                      <Image
+                        src={contest.boxCost.image}
+                        alt={contest.boxCost.symbol}
+                        width={48}
+                        height={48}
+                      />
                     </div>
                     <div className="stat-title">Total Cost</div>
                     <div className="stat-value">
-                      TOTAL COST
+                      {toTokens(contest.boxCost.amount * BigInt(selectedBoxes.length), contest.boxCost.decimals)}
                     </div>
                     <div className="stat-desc">
-                      SYMBOL
+                      ${contest.boxCost.symbol}
                     </div>
                   </div>
                 </div>
-                <div className="text-center flex flex-col gap-1 mt-4">
-                  <div>Buy CURRENCY with</div>
-                  <div className="flex w-full justify-center items-center gap-2">
-                    <FundButton />
-                  </div>
-                  <div className="text-xs">
-                    When you buy CURRENCY, make sure to send it to the following address:
-                  </div>
-                  <div className="text-xs flex items-center gap-1">
-                    <code>{address}</code>
-                    <label className="swap swap-rotate">
-                      <input 
-                        id="copy-address-main"
-                        type="checkbox"                   
-                        onClick={() => {
-                          void navigator.clipboard.writeText(address ?? "");
-                          toast.success("Wallet address copied!");
-                          // wait 5 seconds then switch the checkbox back
-                          setTimeout(() => {
-                            const checkbox = document.getElementById('copy-address-main') as HTMLInputElement;
-                            checkbox.checked = false;
-                          }, 5000);
-                        }}
-                      />
-                      <DocumentDuplicateIcon className="swap-off w-4 h-4 stroke-2" />
-                      <CheckIcon className="swap-on w-4 h-4 stroke-2" />
-                    </label>
-                  </div>
+                <div className="text-center flex flex-col gap-1 mt-2 w-full max-w-xs pb-20">
+                  <Link href={`/fund?${buyQueryParams}`} className="btn btn-primary btn-block">
+                    Buy ${contest.boxCost.symbol}
+                  </Link>
                 </div>
               </div>
             </div>
