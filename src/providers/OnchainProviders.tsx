@@ -101,6 +101,7 @@ const OnchainProviders: FC<Props> = ({ children }) => {
           apiKey={env.NEXT_PUBLIC_CDP_API_KEY}
           chain={DEFAULT_CHAIN}
           schemaId={EAS_SCHEMA_ID}
+          projectId={env.NEXT_PUBLIC_CDP_PROJECT_ID}
           config={{
             appearance: {
               name: APP_NAME,
