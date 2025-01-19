@@ -84,6 +84,6 @@ export const identityRouter = createTRPCRouter({
         return newIdentity;
       }
 
-      return null;
+      return existingIdentity;
     }),
 }); 
