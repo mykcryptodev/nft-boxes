@@ -54,6 +54,7 @@ export const identityRouter = createTRPCRouter({
       const bio = profiles.find(p => p.bio)?.bio;
 
       const thereAreChanges = () => {
+        if !existingIdentity return true;
         return existingIdentity && (
           (existingIdentity.name ?? null) !== (name ?? null) || 
           (existingIdentity.image ?? null) !== (image ?? null) || 
