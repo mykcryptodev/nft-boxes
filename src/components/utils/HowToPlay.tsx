@@ -42,7 +42,7 @@ export const HowToPlay: FC = () => {
                 What happens if a grid does not sell out?
               </div>
               <div className="collapse-content"> 
-                <p>The creator of the game can kick-off the randomizing of box scores at any time. Once this process is kicked off, boxes can no longer be claimed. If an empty box wins, the first player in the game to claim the reward will receive 50% of the reward for that box -- the other 50% will go towards keeping the dapp operational.</p>
+                <p>The creator of the game can kick-off the randomizing of box scores at any time. Once this process is kicked off, boxes can no longer be claimed. If an empty box wins, the reward is burned.</p>
               </div>
             </div>
             <div className="collapse collapse-arrow bg-base-200">

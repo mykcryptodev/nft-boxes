@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { type FC } from "react";
 import { isAddress, isAddressEqual } from "viem";
+import { useAccount } from "wagmi";
 
 import { Owner } from "~/components/Identity/Owner";
 import { DEFAULT_CHAIN } from "~/constants";
@@ -15,6 +16,7 @@ type Props = {
   boxId: number;
   onBoxSelected: (boxId: number) => void;
   onBoxUnselected: (boxId: number) => void;
+  onlyMyBoxes: boolean;
   selectedBoxIds: number[];
   contest: Contest;
   game: Game;
@@ -23,7 +25,8 @@ type Props = {
   scoresOnchain: ScoresOnChain;
 }
 
-export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnselected, selectedBoxIds, contest, game, row, col, scoresOnchain }) => {
+export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnselected, onlyMyBoxes, selectedBoxIds, contest, game, row, col, scoresOnchain }) => {
+  const { address } = useAccount();
   const { owner, isLoading: isOwnerLoading } = useBoxOwner(boxesAddress, boxId);
   const { hasWon } = useBoxIsWinner({
     col,
@@ -37,6 +40,10 @@ export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnsele
   const boxIsUnclaimed = useMemo(() => {
     return owner && isAddress(owner) && isAddressEqual(owner, CONTEST_CONTRACT[DEFAULT_CHAIN.id]!);
   }, [owner]);
+
+  const isMyBox = useMemo(() => {
+    return owner && address && isAddress(owner) && isAddressEqual(owner, address);
+  }, [owner, address]);
 
   if (isOwnerLoading) {
     return (
@@ -64,7 +71,7 @@ export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnsele
   }
 
   return (
-    <div className={`h-full w-full rounded-lg flex items-center justify-center relative p-px ${hasWon ? 'bg-gradient-to-b from-primary to-secondary' : 'bg-base-300'}`}>
+    <div className={`h-full w-full rounded-lg flex items-center justify-center relative p-px ${hasWon ? 'bg-gradient-to-b from-primary to-secondary' : 'bg-base-300'} ${onlyMyBoxes && !isMyBox ? 'opacity-10' : ''}`}>
       <div className="bg-base-300 h-full w-full flex items-center justify-center rounded-[calc(0.5rem-1px)]">
         <div className="flex items-center justify-center">
           {owner && owner !== CONTEST_CONTRACT[DEFAULT_CHAIN.id] ? (

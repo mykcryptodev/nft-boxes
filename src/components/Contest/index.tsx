@@ -27,7 +27,7 @@ const Contest: FC<GameProps> = ({ contestId }) => {
   });
   const [selectedBoxIds, setSelectedBoxIds] = useState<number[]>([]);
 
-  const tabs = [ "Grid", "Winners", /*"My Boxes"*/] as const;
+  const tabs = [ "Grid", "My Boxes", "Winners"] as const;
   const [activeTab, setActiveTab] = useState<string>(tabs[0]);
   const [swapIsOpen, setSwapIsOpen] = useState<boolean>(false);
 
@@ -61,9 +61,10 @@ const Contest: FC<GameProps> = ({ contestId }) => {
           </div>
         </>
       )}
-      <div className={`${activeTab === "Grid" && !swapIsOpen ? "block" : "hidden"} mb-10`}>
+      <div className={`${(activeTab === "Grid" || activeTab === "My Boxes") && !swapIsOpen ? "block" : "hidden"} mb-10`}>
         <Grid 
           game={game} 
+          onlyMyBoxes={activeTab === "My Boxes"}
           contest={contest} 
           scoresOnchain={scoresOnchain} 
           selectedBoxIds={selectedBoxIds} 

@@ -1,4 +1,6 @@
 import { type FC, useEffect,useMemo,useState } from "react";
+import { isAddressEqual } from "viem";
+import { useAccount } from "wagmi";
 
 import { type Contest,type ScoresOnChain } from "~/types/contest";
 import { type Game } from "~/types/game";
@@ -7,12 +9,11 @@ import Box from "./Box";
 import { BuyBoxes } from "./BuyBoxes";
 import GenerateRandomValues from "./GenerateRandomValues";
 import { TeamName } from "./TeamName";
-import { useAccount } from "wagmi";
-import { isAddressEqual } from "viem";
 
 type Props = {
   game: Game;
   contest: Contest;
+  onlyMyBoxes: boolean;
   scoresOnchain: ScoresOnChain;
   selectedBoxIds: number[];
   setSelectedBoxIds: (ids: number[]) => void;
@@ -24,6 +25,7 @@ type Props = {
 export const Grid: FC<Props> = ({ 
   game, 
   contest, 
+  onlyMyBoxes,
   scoresOnchain, 
   selectedBoxIds, 
   setSelectedBoxIds, 
@@ -83,6 +85,7 @@ export const Grid: FC<Props> = ({
         key={i} 
         boxId={boxId + (Number(contest.id) * 100)}
         boxesAddress={contest.boxesAddress}
+        onlyMyBoxes={onlyMyBoxes}
         selectedBoxIds={selectedBoxIds}
         onBoxSelected={(boxId) => {
           setSelectedBoxIds([...selectedBoxIds, boxId]);
