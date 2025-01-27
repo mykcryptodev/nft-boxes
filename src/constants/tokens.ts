@@ -3,7 +3,7 @@ import type { Token } from "@coinbase/onchainkit/token";
 import { DEFAULT_CHAIN } from "./index";
 
 export const ETH_TOKEN: Token = {
-  address: '0x0000000000000000000000000000000000000000',
+  address: '',
   chainId: DEFAULT_CHAIN.id,
   decimals: 18,
   image:

@@ -127,7 +127,9 @@ export const Price: FC<Props> = ({ contest, onSwapToggle }) => {
             <SwapDefault
               from={DEFAULT_TOKENS}
               to={[{
-                address: contest.boxCost.currency,
+                address: isAddressEqual(contest.boxCost.currency, zeroAddress) 
+                  ? "" 
+                  : contest.boxCost.currency,
                 chainId: base.id,
                 decimals: contest.boxCost.decimals,
                 name: contest.boxCost.name,
