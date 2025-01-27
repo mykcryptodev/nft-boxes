@@ -40,8 +40,11 @@ export const Winners: FC<Props> = ({ contest, scoresOnchain }) => {
     }
     const totalRewards = Number(contest.totalRewards);
     const rewardsForQuarter = totalRewards * payouts[quarterIndex as keyof typeof payouts];
-    const formattedRewards = toTokens(BigInt(rewardsForQuarter), contest.boxCost.decimals);
-    return formattedRewards;
+    const rewardTokens = toTokens(BigInt(rewardsForQuarter), contest.boxCost.decimals);
+    return Number(rewardTokens).toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 4,
+    });
   }
 
   const Winner: FC<{ tokenId: number, rewards: string, quarterIndex: number }> = ({ tokenId, rewards, quarterIndex }) => {
