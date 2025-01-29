@@ -23,7 +23,7 @@ export const IdentityForm: FC<Props> = ({ onIdentitySet }) => {
     setIsMounted(true);
   }, []);
 
-  const { mutateAsync: setIdentity, isPending } = api.user.setIdentity.useMutation();
+  const { mutateAsync: setIdentity, isPending } = api.identity.setIdentity.useMutation();
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormInput>({
     defaultValues: {
       username: '',
