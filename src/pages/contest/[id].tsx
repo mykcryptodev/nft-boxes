@@ -1,7 +1,13 @@
 import { type GetServerSideProps } from 'next'
+import { type IncomingMessage } from 'http';
 
 import Contest from '~/components/Contest';
 import { APP_URL } from '~/constants'
+
+type ExtendedRequest = IncomingMessage & {
+  cookies: Record<string, string | undefined>;
+  frameMetadata?: string;
+};
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.query;
@@ -28,8 +34,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   // Attach the frame metadata to the request object
   if (context.req) {
-    // @ts-ignore
-    (context.req as any).frameMetadata = frameMetadata;
+    (context.req as ExtendedRequest).frameMetadata = frameMetadata;
   }
 
   return {

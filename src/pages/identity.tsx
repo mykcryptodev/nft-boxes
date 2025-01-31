@@ -1,7 +1,6 @@
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
 import { type FC } from "react";
 import { useAccount } from "wagmi";
 
@@ -15,7 +14,6 @@ const IdentityForm = dynamic(() => import("~/components/Identity/Form"), {
 });
 
 const IdentityPage: FC = () => {
-  const { data: session} = useSession();
   const { address } = useAccount();
   const router = useRouter();
   const { contestId, returnUrl } = router.query;

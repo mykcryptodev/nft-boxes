@@ -1,6 +1,6 @@
 import { getName } from '@coinbase/onchainkit/identity';
 import { createThirdwebClient } from "thirdweb";
-import { getSocialProfiles } from "thirdweb/social";
+import { getSocialProfiles,type SocialProfile } from "thirdweb/social";
 import { isAddress } from "viem";
 import { base } from "viem/chains";
 import { z } from "zod";
@@ -62,7 +62,6 @@ export const identityRouter = createTRPCRouter({
       // First try to get from cache
       if (CACHE_IDENTITIES) {
         const cachedIdentity = await getCachedIdentity(input.address);
-        console.log('cachedIdentity', cachedIdentity);
         if (cachedIdentity) {
           return cachedIdentity;
         }
@@ -81,7 +80,6 @@ export const identityRouter = createTRPCRouter({
       if (existingIdentity?.name && existingIdentity?.image) {
         if (CACHE_IDENTITIES) {
           // Cache the existing identity before returning
-          console.log('setting cache of existing identity', existingIdentity);
           await setCachedIdentity(input.address, existingIdentity);
         }
         return existingIdentity;
@@ -91,61 +89,66 @@ export const identityRouter = createTRPCRouter({
         clientId: env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
       });
 
-      const [profiles, basename] = await Promise.all([
-        getSocialProfiles({
-          address: input.address,
-          client,
-        }),
-        getName({ address: input.address, chain: base })
-      ]);
-
-      const name = basename ?? profiles.find(p => p.name)?.name;
-      const rawImage = profiles.find(p => p.avatar?.startsWith('https://'))?.avatar;
-      const image = rawImage ? replaceIpfsUrl(rawImage) : null;
-      const bio = profiles.find(p => p.bio)?.bio;
-
-      const thereAreChanges = () => {
-        if (!existingIdentity) {
-          return true;
-        }
-        return existingIdentity && (
-          (existingIdentity.name ?? null) !== (name ?? null) || 
-          (existingIdentity.image ?? null) !== (image ?? null) || 
-          (existingIdentity.bio ?? null) !== (bio ?? null)
-        );
-      }
-
-      if (thereAreChanges()) {
-        const newIdentity = await ctx.db.user.upsert({
-          where: { address: input.address },
-          update: {
-            name,
-            image,
-            bio,
-          },
-          create: {
+      try {
+        const [profiles, basename] = await Promise.all([
+          getSocialProfiles({
             address: input.address,
-            name,
-            image,
-            bio,
-          },
-          select: {
-            name: true,
-            image: true,
-            bio: true,
-          },
-        });
-        // Cache the new identity before returning
-        console.log('setting cache of new identity', newIdentity);
-        await setCachedIdentity(input.address, newIdentity);
-        return newIdentity;
-      }
+            client,
+          }),
+          getName({ address: input.address, chain: base })
+        ]) as [SocialProfile[], string | null];
 
-      // Cache the existing identity before returning
-      if (existingIdentity) {
-        console.log('setting cache of existing identity with updates', existingIdentity);
-        await setCachedIdentity(input.address, existingIdentity);
+        const name = basename ?? profiles.find(p => 'name' in p && typeof p.name === 'string')?.name ?? null;
+        const rawImage = profiles.find(p => 'avatar' in p && typeof p.avatar === 'string' && p.avatar.startsWith('https://'))?.avatar ?? null;
+        const image = rawImage ? replaceIpfsUrl(rawImage) : null;
+        const bio = profiles.find(p => 'bio' in p && typeof p.bio === 'string')?.bio ?? null;
+
+        const thereAreChanges = () => {
+          if (!existingIdentity) {
+            return true;
+          }
+          return existingIdentity && (
+            (existingIdentity.name ?? null) !== name || 
+            (existingIdentity.image ?? null) !== image || 
+            (existingIdentity.bio ?? null) !== bio
+          );
+        }
+
+        if (thereAreChanges()) {
+          const newIdentity = await ctx.db.user.upsert({
+            where: { address: input.address },
+            update: {
+              name,
+              image,
+              bio,
+            },
+            create: {
+              address: input.address,
+              name,
+              image,
+              bio,
+            },
+            select: {
+              name: true,
+              image: true,
+              bio: true,
+            },
+          });
+          // Cache the new identity before returning
+          if (CACHE_IDENTITIES) {
+            await setCachedIdentity(input.address, newIdentity);
+          }
+          return newIdentity;
+        }
+
+        // Cache the existing identity before returning
+        if (existingIdentity && CACHE_IDENTITIES) {
+          await setCachedIdentity(input.address, existingIdentity);
+        }
+        return existingIdentity;
+      } catch (error) {
+        console.error('Error fetching social profiles:', error);
+        return existingIdentity;
       }
-      return existingIdentity;
     })
 }); 
