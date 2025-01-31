@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { createThirdwebClient, getContract } from "thirdweb";
-import { type Address } from "viem";
 
-import { DEFAULT_CHAIN } from "~/constants";
+import { CACHE_CONTESTS, DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT, CONTEST_READER_CONTRACT } from "~/constants/addresses";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
-import { boxes, contests, fetchContestCols, fetchContestRows,isRewardPaidForQuarter } from "~/thirdweb/84532/0x7bbc05e8e8eada7845fa106dfd3fc41a159b90f5";
+import { boxes, contests, fetchContestCols, fetchContestRows, isRewardPaidForQuarter } from "~/thirdweb/84532/0x7bbc05e8e8eada7845fa106dfd3fc41a159b90f5";
 import { getContestCurrency } from "~/thirdweb/84532/0x534dc0b2ac842d411d1e15c6b794c1ecea9170c7";
 import { type Contest } from "~/types/contest";
 import { api } from "~/utils/api";
@@ -17,10 +16,20 @@ const useContest = (contestId: string) => {
   const [error, setError] = useState<unknown>(undefined);
 
   const { mutateAsync: getTokenImage } = api.coingecko.getTokenImage.useMutation();
+  const { data: cachedContest } = api.contest.getCached.useQuery({ contestId }, { enabled: CACHE_CONTESTS });
+  const { mutateAsync: setContestCache } = api.contest.setCache.useMutation();
 
   const fetchContest = useCallback(async () => {
     setIsLoading(true);
     setError(undefined);
+
+    // If we have cached data, use it immediately
+    if (cachedContest && CACHE_CONTESTS) {
+      setData(cachedContest as Contest);
+      setIsLoading(false);
+      return;
+    }
+
     const client = createThirdwebClient({
       clientId: env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
     });
@@ -86,17 +95,16 @@ const useContest = (contestId: string) => {
           contestId: BigInt(contestId),
         })
       ]);
-      console.log({currency});
       const tokenImage = await getTokenImage({
         chainId: DEFAULT_CHAIN.id,
         tokenAddress: currency[0],
       });
-      setData({
+      const contestData: Contest = {
         id: contest[0],
         gameId: contest[1],
         creator: contest[2],
         boxCost: {
-          currency: contest[3].currency as Address,
+          currency: contest[3].currency,
           amount: contest[3].amount,
           decimals: Number(currency[1]),
           symbol: currency[2],
@@ -104,24 +112,38 @@ const useContest = (contestId: string) => {
           image: tokenImage,
         },
         boxesCanBeClaimed: contest[4],
-        rewardsPaid: contest[5],
+        rewardsPaid: {
+          q1Paid,
+          q2Paid,
+          q3Paid,
+          finalPaid,
+        },
         totalRewards: contest[6],
         boxesClaimed: contest[7],
         randomValuesSet: contest[8],
-        cols,
-        rows,
-        boxesAddress: boxesAddress as Address,
+        cols: cols.map(Number),
+        rows: rows.map(Number),
+        boxesAddress,
         q1Paid,
         q2Paid,
         q3Paid,
         finalPaid,
-      });
+      };
+      setData(contestData);
+
+      // Cache the contest data
+      if (CACHE_CONTESTS) {
+        await setContestCache({
+          contestId,
+          contestData,
+        });
+      }
     } catch (error) {
       setError(error);
     } finally {
       setIsLoading(false);
     }
-  }, [contestId, getTokenImage]);
+  }, [contestId, getTokenImage, cachedContest, setContestCache]);
 
   useEffect(() => {
     void fetchContest();

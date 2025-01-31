@@ -22,8 +22,8 @@ export type Contest = {
     totalRewards: bigint;
     boxesClaimed: bigint;
     randomValuesSet: boolean;
-    cols: readonly number[];
-    rows: readonly number[];
+    cols: number[];
+    rows: number[];
     boxesAddress: Address;
     q1Paid: boolean;
     q2Paid: boolean;

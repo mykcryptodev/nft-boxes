@@ -78,6 +78,9 @@ const OnchainProviders: FC<Props> = ({ children }) => {
           schemaId={EAS_SCHEMA_ID}
           projectId={env.NEXT_PUBLIC_CDP_PROJECT_ID}
           config={{
+            wallet: {
+              display: 'modal',
+            },
             appearance: {
               name: APP_NAME,
               logo: "/images/logo.png",

@@ -16,6 +16,7 @@ import { env } from '~/env';
 import { getThirdwebChain } from '~/helpers/getThirdwebChain';
 import { claimBoxes } from '~/thirdweb/84532/0x7bbc05e8e8eada7845fa106dfd3fc41a159b90f5';
 import { type Contest } from "~/types/contest";
+import { api } from '~/utils/api';
 
 type Props = {
     contest: Contest;
@@ -27,12 +28,15 @@ type Props = {
 export const BuyBoxes: FC<Props> = ({ contest, selectedBoxes, setSelectedBoxes, onBoxBuySuccess }) => {
     const { address } = useAccount();
     const [balance, setBalance] = useState<bigint>(0n);
+    const { mutate: invalidateCache } = api.contest.invalidateCache.useMutation();
+
     const handleOnStatus = useCallback((status: LifecycleStatus) => {
         console.log('LifecycleStatus', status);
         if (status.statusName === 'success') {
+            invalidateCache({ contestId: contest.id.toString() });
             void onBoxBuySuccess();
         }
-    }, [onBoxBuySuccess]);
+    }, [onBoxBuySuccess, invalidateCache, contest.id]);
 
     const totalAmount = useMemo(() => toTokens(
       contest.boxCost.amount * BigInt(selectedBoxes.length),

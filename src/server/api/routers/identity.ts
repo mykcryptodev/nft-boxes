@@ -5,12 +5,13 @@ import { isAddress } from "viem";
 import { base } from "viem/chains";
 import { z } from "zod";
 
+import { CACHE_IDENTITIES } from '~/constants';
 import { env } from "~/env";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { getCachedIdentity, setCachedIdentity } from "~/server/redis";
 
-const KNOWN_BROKEN_IMAGES: Record<string, boolean> = {
-  'https://ipfs.decentralized-content.com/ipfs/bafkreidt64lfzm2aqretsn4sweh2vxdweik2q7op753uwyk7tmxlu6dx5y': true
+const replaceIpfsUrl = (url: string) => {
+  return url.replace('ipfs.decentralized-content.com', 'ipfs.io');
 }
 
 export const identityRouter = createTRPCRouter({
@@ -41,7 +42,9 @@ export const identityRouter = createTRPCRouter({
           image: user.image,
           bio: user.bio,
         };
-        await setCachedIdentity(user.address, identityData);
+        if (CACHE_IDENTITIES) {
+          await setCachedIdentity(user.address, identityData);
+        }
       }
 
       return user;
@@ -52,16 +55,17 @@ export const identityRouter = createTRPCRouter({
       address: z.string(),
     }))
     .query(async ({ ctx, input }) => {
-      console.log('getOrFetchIdentity', input.address);
       if (!isAddress(input.address)) {
         throw new Error("Invalid address");
       }
 
       // First try to get from cache
-      const cachedIdentity = await getCachedIdentity(input.address);
-      console.log('cachedIdentity', cachedIdentity);
-      if (cachedIdentity) {
-        return cachedIdentity;
+      if (CACHE_IDENTITIES) {
+        const cachedIdentity = await getCachedIdentity(input.address);
+        console.log('cachedIdentity', cachedIdentity);
+        if (cachedIdentity) {
+          return cachedIdentity;
+        }
       }
 
       // Then try to find existing identity in database
@@ -75,9 +79,11 @@ export const identityRouter = createTRPCRouter({
       });
 
       if (existingIdentity?.name && existingIdentity?.image) {
-        console.log('setting cache', existingIdentity);
-        // Cache the existing identity before returning
-        await setCachedIdentity(input.address, existingIdentity);
+        if (CACHE_IDENTITIES) {
+          // Cache the existing identity before returning
+          console.log('setting cache of existing identity', existingIdentity);
+          await setCachedIdentity(input.address, existingIdentity);
+        }
         return existingIdentity;
       }
       
@@ -94,7 +100,8 @@ export const identityRouter = createTRPCRouter({
       ]);
 
       const name = basename ?? profiles.find(p => p.name)?.name;
-      const image = profiles.find(p => p.avatar?.startsWith('https://') && !KNOWN_BROKEN_IMAGES[p.avatar])?.avatar;
+      const rawImage = profiles.find(p => p.avatar?.startsWith('https://'))?.avatar;
+      const image = rawImage ? replaceIpfsUrl(rawImage) : null;
       const bio = profiles.find(p => p.bio)?.bio;
 
       const thereAreChanges = () => {
@@ -129,14 +136,14 @@ export const identityRouter = createTRPCRouter({
           },
         });
         // Cache the new identity before returning
-        console.log('setting cache', newIdentity);
+        console.log('setting cache of new identity', newIdentity);
         await setCachedIdentity(input.address, newIdentity);
         return newIdentity;
       }
 
       // Cache the existing identity before returning
       if (existingIdentity) {
-        console.log('setting cache', existingIdentity);
+        console.log('setting cache of existing identity with updates', existingIdentity);
         await setCachedIdentity(input.address, existingIdentity);
       }
       return existingIdentity;

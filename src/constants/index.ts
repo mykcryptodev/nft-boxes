@@ -7,6 +7,9 @@ export const SUPPORTED_CHAINS: readonly [Chain, ...Chain[]] = [base, baseSepolia
 export const DEFAULT_CHAIN = SUPPORTED_CHAINS[0];
 export const EAS_SCHEMA_ID = "0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9";
 
+export const CACHE_CONTESTS = true;
+export const CACHE_IDENTITIES = true;
+
 export const CHAINLINK_SUBSCRIPTION_ID: Record<number, bigint> = {
   [baseSepolia.id]: 208n,
   [base.id]: 6n,
