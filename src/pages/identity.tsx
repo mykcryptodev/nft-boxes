@@ -2,13 +2,17 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { type FC,useEffect, useState } from "react";
+import { type FC } from "react";
 import { useAccount } from "wagmi";
 
 import { Wallet } from "~/components/Wallet";
 import { api } from "~/utils/api";
 
-const IdentityForm = dynamic(() => import("~/components/Identity/Form"), { ssr: false });
+// Import the form with noSSR to handle client-side only components
+const IdentityForm = dynamic(() => import("~/components/Identity/Form"), { 
+  ssr: false,
+  loading: () => <div className="animate-pulse h-[400px] w-full bg-base-300 rounded-lg" />
+});
 
 const IdentityPage: FC = () => {
   const { data: session} = useSession();
@@ -28,16 +32,6 @@ const IdentityPage: FC = () => {
     }
   };
 
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) {
-    return null;
-  }
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto">
@@ -54,9 +48,9 @@ const IdentityPage: FC = () => {
             <h1 className="card-title text-3xl mb-8">Update Your Profile</h1>
             {address ? (
               <IdentityForm 
-              onIdentitySet={() => {
-                void refetch();
-                handleBack();
+                onIdentitySet={() => {
+                  void refetch();
+                  handleBack();
                 }}
               />
             ) : (

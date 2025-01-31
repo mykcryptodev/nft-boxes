@@ -1,8 +1,8 @@
-import { type FC, useEffect,useMemo,useState } from "react";
+import { type FC, useEffect, useMemo, useState } from "react";
 import { isAddressEqual } from "viem";
 import { useAccount } from "wagmi";
 
-import { type Contest,type ScoresOnChain } from "~/types/contest";
+import { type Contest, type ScoresOnChain } from "~/types/contest";
 import { type Game } from "~/types/game";
 
 import Box from "./Box";
@@ -17,8 +17,6 @@ type Props = {
   scoresOnchain: ScoresOnChain;
   selectedBoxIds: number[];
   setSelectedBoxIds: (ids: number[]) => void;
-  contestKey: number;
-  setContestKey: (key: number) => void;
   refetch: () => void;
 }
 
@@ -28,13 +26,12 @@ export const Grid: FC<Props> = ({
   onlyMyBoxes,
   scoresOnchain, 
   selectedBoxIds, 
-  setSelectedBoxIds, 
-  contestKey, 
-  setContestKey,
+  setSelectedBoxIds,
   refetch 
 }) => {
   const { address } = useAccount();
   const [visibleBoxes, setVisibleBoxes] = useState(20);
+  const [updateKey, setUpdateKey] = useState(0);
 
   const userIsContestOwner = useMemo(() =>{
     if (!address) return false;
@@ -52,6 +49,12 @@ export const Grid: FC<Props> = ({
     
     return () => clearInterval(interval);
   }, [visibleBoxes]);
+
+  const handleUpdate = () => {
+    setSelectedBoxIds([]);
+    setUpdateKey(prev => prev + 1);
+    void refetch();
+  };
 
   const renderBox = (i: number, isLoading = false) => {
     const rowNumber = Math.floor(i / 11);
@@ -82,7 +85,7 @@ export const Grid: FC<Props> = ({
 
     return (
       <Box
-        key={i} 
+        key={`${i}-${updateKey}`}
         boxId={boxId + (Number(contest.id) * 100)}
         boxesAddress={contest.boxesAddress}
         onlyMyBoxes={onlyMyBoxes}
@@ -107,11 +110,7 @@ export const Grid: FC<Props> = ({
       {(userIsContestOwner || contest.boxesClaimed === 100n) && (
         <GenerateRandomValues 
           contest={contest}
-          onValuesGenerated={() => {
-            setSelectedBoxIds([]);
-            setContestKey(contestKey + 1);
-            void refetch();
-          }} 
+          onValuesGenerated={handleUpdate}
         />
       )}
       <div className="grid grid-cols-12 mt-2">
@@ -138,15 +137,11 @@ export const Grid: FC<Props> = ({
         </div>
       </div>
       <BuyBoxes 
-        key={contestKey}
+        key={updateKey}
         contest={contest}
         selectedBoxes={selectedBoxIds} 
         setSelectedBoxes={setSelectedBoxIds} 
-        onBoxBuySuccess={() => {
-          setSelectedBoxIds([]);
-          setContestKey(contestKey + 1);
-          void refetch();
-        }}
+        onBoxBuySuccess={handleUpdate}
       />
     </>
   );

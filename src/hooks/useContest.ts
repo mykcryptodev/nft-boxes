@@ -16,7 +16,15 @@ const useContest = (contestId: string) => {
   const [error, setError] = useState<unknown>(undefined);
 
   const { mutateAsync: getTokenImage } = api.coingecko.getTokenImage.useMutation();
-  const { data: cachedContest } = api.contest.getCached.useQuery({ contestId }, { enabled: CACHE_CONTESTS });
+  const { data: cachedContest } = api.contest.getCached.useQuery(
+    { contestId }, 
+    { 
+      enabled: CACHE_CONTESTS,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchInterval: false,
+    }
+  );
   const { mutateAsync: setContestCache } = api.contest.setCache.useMutation();
 
   const fetchContest = useCallback(async () => {
@@ -143,15 +151,15 @@ const useContest = (contestId: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [contestId, getTokenImage, cachedContest, setContestCache]);
+  }, [contestId, getTokenImage, setContestCache]);
 
   useEffect(() => {
     void fetchContest();
   }, [contestId, fetchContest]);
 
-  const refetch = () => {
+  const refetch = useCallback(() => {
     void fetchContest();
-  };
+  }, [fetchContest]);
 
   return {
     data,
