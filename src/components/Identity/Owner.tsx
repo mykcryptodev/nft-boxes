@@ -2,15 +2,17 @@ import { Socials } from "@coinbase/onchainkit/identity";
 import { ArrowTopRightOnSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { type FC,useState } from "react";
+import { type FC, useMemo, useState } from "react";
 import { Blobbie } from "thirdweb/react";
 import { shortenAddress } from "thirdweb/utils";
-import { type Address } from "viem";
+import { type Address, isAddressEqual } from "viem";
 import { base } from "viem/chains";
+import { useAccount } from "wagmi";
 
 import { Portal } from "~/components/utils/Portal";
 import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
+import { type Contest } from "~/types/contest";
 import { api } from "~/utils/api";
 
 type Props = {
@@ -19,14 +21,19 @@ type Props = {
   boxesAddress: string;
   showName?: boolean;
   avatarSize?: number;
+  contest: Contest;
 }
-export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarSize = 6 }) => {
+
+export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarSize = 6, contest }) => {
+  const { address } = useAccount();
   const { data: identity, isLoading } = api.identity.getOrFetchIdentity.useQuery({
     address: owner ?? ''
   }, {
     enabled: !!owner,
   });
   const [isError, setIsError] = useState(false);
+  const isOwnBox = useMemo(() => address && owner && isAddressEqual(address, owner), [address, owner]);
+  console.log({isOwnBox, address, owner, contest});
 
   if (isLoading) {
     return (
@@ -107,7 +114,15 @@ export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarS
             {identity?.bio && (
               <p className="py-4 prose text-xs">{identity.bio}</p>
             )}
-            <div className="modal-action">
+            <div className="modal-action flex gap-2">
+              {isOwnBox && contest?.id && (
+                <Link
+                  href={`/identity?contestId=${contest.id.toString()}&returnUrl=/contest/${contest.id}`}
+                  className="btn btn-primary"
+                >
+                  Update Profile
+                </Link>
+              )}
               <Link
                 href={`https://opensea.io/assets/${DEFAULT_CHAIN.name.toLowerCase()}/${boxesAddress}/${boxId}`}
                 target="_blank"

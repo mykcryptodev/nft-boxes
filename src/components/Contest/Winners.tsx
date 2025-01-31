@@ -4,7 +4,7 @@ import { toTokens } from "thirdweb";
 import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { useBoxOwner } from "~/hooks/useBoxOwner";
-import { type Contest,type ScoresOnChain } from "~/types/contest";
+import { type Contest, type ScoresOnChain } from "~/types/contest";
 
 import { Owner } from "../Identity/Owner";
 import { ClaimReward } from "./ClaimReward";
@@ -13,6 +13,7 @@ type Props = {
   contest: Contest;
   scoresOnchain: ScoresOnChain;
 }
+
 export const Winners: FC<Props> = ({ contest, scoresOnchain }) => {
   // Helper function to get winning box for a quarter
   const getQuarterWinningTokenId = (quarterIndex: number) => {
@@ -60,6 +61,7 @@ export const Winners: FC<Props> = ({ contest, scoresOnchain }) => {
               boxesAddress={contest.boxesAddress} 
               showName={true}
               avatarSize={12}
+              contest={contest}
             />
             <ClaimReward 
               contest={contest} 

@@ -8,6 +8,7 @@ import { env } from '~/env';
 import { getThirdwebChain } from '~/helpers/getThirdwebChain';
 import { claimReward } from '~/thirdweb/84532/0x7bbc05e8e8eada7845fa106dfd3fc41a159b90f5';
 import { type Contest } from '~/types/contest';
+import { api } from '~/utils/api';
 
 type Props = {
   tokenId: number;
@@ -15,13 +16,18 @@ type Props = {
   rewards: string;
   quarterIndex: number;
 }
+
 export const ClaimReward: FC<Props> = ({ contest, tokenId, rewards, quarterIndex }) => {
+  const { mutate: invalidateCache } = api.contest.invalidateCache.useMutation();
+
   const handleOnStatus = useCallback((status: LifecycleStatus) => {
     console.log('LifecycleStatus', status);
     if (status.statusName === 'success') {
-      // TODO: refetch contest
+      // Invalidate cache when reward is claimed
+      invalidateCache({ contestId: contest.id.toString() });
     }
-  }, []);
+  }, [invalidateCache, contest.id]);
+
   const callsCallback = useCallback(async () => {
     const client = createThirdwebClient({
       clientId: env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
@@ -36,7 +42,7 @@ export const ClaimReward: FC<Props> = ({ contest, tokenId, rewards, quarterIndex
       tokenId: BigInt(tokenId),
       contestId: BigInt(contest.id),
     });
-    const claimCall ={
+    const claimCall = {
       to: contract.address,
       data: await encode(claimTx),
       value: 0n,

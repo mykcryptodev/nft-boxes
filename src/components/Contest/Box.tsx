@@ -79,6 +79,7 @@ export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnsele
               owner={owner}
               boxId={boxId.toString()}
               boxesAddress={boxesAddress}
+              contest={contest}
             />
           ) : null}
         </div>

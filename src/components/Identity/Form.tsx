@@ -2,6 +2,7 @@ import { useSession } from "next-auth/react";
 import { type FC,useEffect, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import { useAccount } from "wagmi";
 
 import Upload from "~/components/utils/Upload";
 import { api } from "~/utils/api";
@@ -18,16 +19,26 @@ type Props = {
 }
 export const IdentityForm: FC<Props> = ({ onIdentitySet }) => {
   const { data: session} = useSession();
+  const { address } = useAccount();
   const [isMounted, setIsMounted] = useState<boolean>(false);
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const { mutateAsync: setIdentity, isPending } = api.user.setIdentity.useMutation();
+  const { mutateAsync: setIdentity, isPending } = api.identity.setIdentity.useMutation();
+  const { data: identity } = api.identity.getOrFetchIdentity.useQuery({
+    address: address ?? '',
+  }, {
+    enabled: !!address,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  console.log({ identity, isIdentityPage: true })
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormInput>({
     defaultValues: {
-      username: '',
-      avatar: '',
+      username: identity?.name ?? '',
+      avatar: identity?.image ?? '',
     },
   });
   const avatar = watch("avatar");

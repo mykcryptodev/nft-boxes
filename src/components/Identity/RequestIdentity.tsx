@@ -30,7 +30,7 @@ export const RequestIdentity: FC<Props> = ({ contest }) => {
   const [isUserInContest, setIsUserInContest] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { data: name, isLoading: isNameLoading } = useName({ address: address ?? zeroAddress, chain: base });
-  const { data: localProfile, isLoading: isLocalProfileLoading } = api.user.getIdentity.useQuery({
+  const { data: localProfile, isLoading: isLocalProfileLoading } = api.identity.getOrFetchIdentity.useQuery({
     address: address ?? "",
   });
   const [isSettingIdentity, setIsSettingIdentity] = useState<boolean>(false);

@@ -1,4 +1,4 @@
-import { type FC,useState } from "react";
+import { type FC, useState } from "react";
 
 import Scoreboard from "~/components/Contest/Scoreboard";
 import { RequestIdentity } from "~/components/Identity/RequestIdentity";
@@ -13,10 +13,10 @@ import { Winners } from "./Winners";
 type GameProps = {
   contestId: string;
 };
+
 const Contest: FC<GameProps> = ({ contestId }) => {
   const { data: contest, refetch } = useContest(contestId);
   const { data: scoresOnchain } = useScoresOnchain(contest);
-  const [contestKey, setContestKey] = useState<number>(0);
   const { data: game } = api.game.get.useQuery({
     id: Number(contest?.gameId),
   }, {
@@ -31,13 +31,12 @@ const Contest: FC<GameProps> = ({ contestId }) => {
   const [activeTab, setActiveTab] = useState<string>(tabs[0]);
   const [swapIsOpen, setSwapIsOpen] = useState<boolean>(false);
 
-  console.log({ contest, game });
   if (!game || !contest || !scoresOnchain) {
     return null;
   }
 
   return (
-    <div className="w-full" key={contestKey}>
+    <div className="w-full">
       <Header 
         game={game} 
         contest={contest} 
@@ -69,8 +68,6 @@ const Contest: FC<GameProps> = ({ contestId }) => {
           scoresOnchain={scoresOnchain} 
           selectedBoxIds={selectedBoxIds} 
           setSelectedBoxIds={setSelectedBoxIds} 
-          contestKey={contestKey}
-          setContestKey={setContestKey}
           refetch={refetch} 
         />
       </div>

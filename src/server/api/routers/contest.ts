@@ -6,9 +6,41 @@ import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { type CachedContest, getCachedContest, invalidateContestCache, setCachedContest } from "~/server/redis";
 import { contestIdCounter } from "~/thirdweb/84532/0x7bbc05e8e8eada7845fa106dfd3fc41a159b90f5";
 
 const DEFAULT_PAGE_SIZE = 10;
+
+const contestSchema = z.object({
+  id: z.bigint(),
+  gameId: z.bigint(),
+  creator: z.string(),
+  boxCost: z.object({
+    currency: z.string(),
+    decimals: z.number(),
+    symbol: z.string(),
+    name: z.string(),
+    amount: z.bigint(),
+    image: z.string(),
+  }),
+  boxesCanBeClaimed: z.boolean(),
+  rewardsPaid: z.object({
+    q1Paid: z.boolean(),
+    q2Paid: z.boolean(),
+    q3Paid: z.boolean(),
+    finalPaid: z.boolean(),
+  }),
+  totalRewards: z.bigint(),
+  boxesClaimed: z.bigint(),
+  randomValuesSet: z.boolean(),
+  cols: z.array(z.number()),
+  rows: z.array(z.number()),
+  boxesAddress: z.string(),
+  q1Paid: z.boolean(),
+  q2Paid: z.boolean(),
+  q3Paid: z.boolean(),
+  finalPaid: z.boolean(),
+});
 
 export const contestRouter = createTRPCRouter({
   list: publicProcedure
@@ -40,5 +72,32 @@ export const contestRouter = createTRPCRouter({
         ids: contestIds.map(id => id.toString()),
         total: Number(totalContests),
       };
+    }),
+
+  getCached: publicProcedure
+    .input(z.object({
+      contestId: z.string(),
+    }))
+    .query(async ({ input }) => {
+      return await getCachedContest(input.contestId);
+    }),
+
+  setCache: publicProcedure
+    .input(z.object({
+      contestId: z.string(),
+      contestData: contestSchema,
+    }))
+    .mutation(async ({ input }) => {
+      await setCachedContest(input.contestId, input.contestData as CachedContest);
+      return true;
+    }),
+
+  invalidateCache: publicProcedure
+    .input(z.object({
+      contestId: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      await invalidateContestCache(input.contestId);
+      return true;
     }),
 });
