@@ -32,9 +32,9 @@ export const Fund: NextPage<Props> = ({ address, decimals, name, symbol, image, 
           toToken={{
             address: isAddressEqual(address, zeroAddress) 
               ? "" 
-              : address,
+              : address.toLowerCase(),
             chainId: base.id,
-            decimals,
+            decimals: Number(decimals),
             name,
             symbol,
             image,

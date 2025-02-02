@@ -97,9 +97,6 @@ export const useBoxIsWinner = ({
     });
   }, [contest, hasWon, winningQuarters.f, winningQuarters.q1, winningQuarters.q2, winningQuarters.q3, owner]);
 
-  console.log({ row, col, homeScore, scoresOnchain, awayScore, winningQuarters, hasWon, isYetToBePaid, isAbleToBePaid, pendingRewardAmount , boxId: `${col}-${row}`});
-
-
   return {
     winningQuarters,
     hasWon,

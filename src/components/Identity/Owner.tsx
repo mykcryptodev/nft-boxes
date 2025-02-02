@@ -34,7 +34,6 @@ export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarS
   const [isError, setIsError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isOwnBox = useMemo(() => address && owner && isAddressEqual(address, owner), [address, owner]);
-  console.log({isOwnBox, address, owner, contest});
 
   if (isLoading) {
     return (

@@ -34,8 +34,19 @@ export const Price: FC<Props> = ({ contest, onSwapToggle }) => {
       ? undefined 
       : contest.boxCost.currency,
   });
-  
-
+  console.log("================================================");
+  console.log("PRICE");
+  console.log("================================================");
+  console.log("address", contest.boxCost.currency);
+  console.log(
+    "isAddressEqual(address, zeroAddress)",
+    isAddressEqual(contest.boxCost.currency, zeroAddress)
+  );
+  console.log("name", contest.boxCost.name);
+  console.log("symbol", contest.boxCost.symbol);
+  console.log("image", contest.boxCost.image);
+  console.log("contestId", contest.id);
+  console.log("================================================");
   const Stats: FC = () => {
     return (
       <div className="flex flex-row overflow-x-scroll sm:max-w-full max-w-sm">
