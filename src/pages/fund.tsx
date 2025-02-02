@@ -4,6 +4,7 @@ import { SwapDefault } from "@coinbase/onchainkit/swap";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { type GetServerSideProps, type NextPage } from "next";
 import Link from "next/link";
+import { isAddressEqual, zeroAddress } from "viem";
 import { base } from "viem/chains";
 
 import { DEFAULT_TOKENS } from "~/constants/tokens";
@@ -29,7 +30,9 @@ export const Fund: NextPage<Props> = ({ address, decimals, name, symbol, image, 
         <p className="mb-2 text-center text-sm">Buy with services like Coinbase and Apple Pay</p>
         <Buy
           toToken={{
-            address,
+            address: isAddressEqual(address, zeroAddress) 
+              ? "" 
+              : address,
             chainId: base.id,
             decimals,
             name,
@@ -48,7 +51,9 @@ export const Fund: NextPage<Props> = ({ address, decimals, name, symbol, image, 
           className="sm:max-w-full max-w-[300px]"
           from={DEFAULT_TOKENS}
           to={[{
-            address,
+            address: isAddressEqual(address, zeroAddress) 
+              ? "" 
+              : address,
             chainId: base.id,
             decimals,
             name,

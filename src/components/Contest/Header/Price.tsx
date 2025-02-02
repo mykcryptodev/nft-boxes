@@ -108,7 +108,9 @@ export const Price: FC<Props> = ({ contest, onSwapToggle }) => {
             <p className="mb-2">Buy with services like Coinbase and Apple Pay</p>
             <Buy
               toToken={{
-                address: contest.boxCost.currency,
+                address: isAddressEqual(contest.boxCost.currency, zeroAddress) 
+                  ? "" 
+                  : contest.boxCost.currency,
                 chainId: base.id,
                 decimals: contest.boxCost.decimals,
                 name: contest.boxCost.name,

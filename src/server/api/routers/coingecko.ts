@@ -1,13 +1,14 @@
-import { NATIVE_TOKEN_ADDRESS } from "thirdweb";
-import { base, getChainMetadata } from "thirdweb/chains";
+import { isAddressEqual, zeroAddress } from "viem";
+import { base } from "viem/chains";
 import { z } from "zod";
 
 import { SUPPORTED_CHAINS } from "~/constants";
 import { COINGECKO_UNKNOWN_IMG } from "~/constants";
 import coingeckoList from "~/constants/tokenLists/coingecko.json";
 import { DEFAULT_TOKENS } from "~/constants/tokens";
-import { getThirdwebChain } from "~/helpers/getThirdwebChain";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+
+const ETH_ICON = `https://dynamic-assets.coinbase.com/dbb4b4983bde81309ddab83eb598358eb44375b930b94687ebe38bc22e52c3b2125258ffb8477a5ef22e33d6bd72e32a506c391caa13af64c00e46613c3e5806/asset_icons/4113b082d21cc5fab17fc8f2d19fb996165bcce635e6900f7fc2d57c4ef33ae9.png`;
 
 export const coingeckoRouter = createTRPCRouter({
   getTokenPrice: publicProcedure
@@ -26,10 +27,9 @@ export const coingeckoRouter = createTRPCRouter({
       if (!chain) {
         throw new Error(`Chain ${input.chainId} not supported`);
       }
-      const tokenIsNative = input.tokenAddress.toLowerCase() === NATIVE_TOKEN_ADDRESS;
-      const chainMetadata = await getChainMetadata(getThirdwebChain(chain));
-      if (tokenIsNative && chainMetadata?.icon?.url) {
-        return chainMetadata.icon.url;
+      const tokenIsNative = isAddressEqual(input.tokenAddress, zeroAddress);
+      if (tokenIsNative) {
+        return ETH_ICON;
       }
       // check default tokens for an image
       const token = DEFAULT_TOKENS.find((t) => t.address.toLowerCase() === input.tokenAddress.toLowerCase());
