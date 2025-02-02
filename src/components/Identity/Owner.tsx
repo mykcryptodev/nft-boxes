@@ -32,6 +32,7 @@ export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarS
     enabled: !!owner,
   });
   const [isError, setIsError] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const isOwnBox = useMemo(() => address && owner && isAddressEqual(address, owner), [address, owner]);
   console.log({isOwnBox, address, owner, contest});
 
@@ -73,10 +74,18 @@ export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarS
         )}
       </label>
       <Portal>
-        <input type="checkbox" id={`${owner}-${boxId}`} className="modal-toggle" />
+        <input 
+          type="checkbox" 
+          id={`${owner}-${boxId}`} 
+          className="modal-toggle" 
+          onChange={(e) => setIsModalOpen(e.target.checked)}
+        />
         <div className="modal modal-bottom sm:modal-middle" role="dialog">
           <div className="modal-box relative">
-            <label htmlFor={`${owner}-${boxId}`} className="btn btn-ghost btn-sm btn-circle absolute right-2 top-2">
+            <label 
+              htmlFor={`${owner}-${boxId}`} 
+              className="btn btn-ghost btn-sm btn-circle absolute right-2 top-2"
+            >
               <XMarkIcon className="w-4 h-4 stroke-2" />
             </label>
             <h3 className="text-2xl font-bold flex items-center gap-2">
@@ -105,7 +114,7 @@ export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarS
                 </div>
               </div>
             </h3>
-            {owner && (
+            {owner && isModalOpen && (
               <Socials
                 address={owner}
                 chain={base}
