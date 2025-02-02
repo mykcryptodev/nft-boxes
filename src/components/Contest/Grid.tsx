@@ -115,7 +115,7 @@ export const Grid: FC<Props> = ({
       )}
       <div className="grid grid-cols-12 mt-2">
         <div className="grid col-span-1" />
-        <div className="grid col-span-10 place-content-center text-2xl">
+        <div className="grid col-span-10 place-content-center text-2xl sm:mb-3">
           <TeamName game={game} homeAway="home" />
         </div>
       </div>
@@ -126,12 +126,23 @@ export const Grid: FC<Props> = ({
           </div>
         </div>
         <div className="grid col-span-10">
-          <div className="grid grid-cols-11 grid-rows-11 gap-1 w-full h-full">
-            {Array.from({ length: 121 }).map((_, i) => {
-              if (i < visibleBoxes) {
-                return renderBox(i);
+          <div className={`grid ${contest.randomValuesSet ? 'grid-cols-11 grid-rows-11' : 'grid-cols-10 grid-rows-10'} gap-1 w-full aspect-square`}>
+            {Array.from({ length: contest.randomValuesSet ? 121 : 100 }).map((_, i) => {
+              if (contest.randomValuesSet) {
+                if (i < visibleBoxes) {
+                  return renderBox(i);
+                }
+                return renderBox(i, true);
+              } else {
+                // When random values are not set, skip the first row and first column boxes
+                const row = Math.floor(i / 10);
+                const col = i % 10;
+                const adjustedIndex = (row + 1) * 11 + (col + 1);
+                if (i < visibleBoxes) {
+                  return renderBox(adjustedIndex);
+                }
+                return renderBox(adjustedIndex, true);
               }
-              return renderBox(i, true);
             })}
           </div>
         </div>
