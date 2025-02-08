@@ -143,6 +143,11 @@ export const contestRouter = createTRPCRouter({
         return acc;
       }, {} as Record<string, number>);
       const uniqueOwners = Object.keys(ownerCounts).filter(owner => !isAddressEqual(owner, CONTEST_CONTRACT[DEFAULT_CHAIN.id]!));
+      // make a map of owners to their token ids
+      const tokenIdsToOwners = owners.reduce((acc, { owner, tokenId }) => {
+        acc[Number(tokenId)] = owner;
+        return acc;
+      }, {} as Record<number, string>);
       // fetch the identities for each owner
       const identities = await ctx.db.user.findMany({
         where: {
@@ -162,6 +167,7 @@ export const contestRouter = createTRPCRouter({
         players: uniqueOwners,
         identities,
         ownerCounts,
+        tokenIdsToOwners,
       };
       
       // set the data in the cache

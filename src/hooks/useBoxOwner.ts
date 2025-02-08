@@ -8,14 +8,27 @@ import { DEFAULT_CHAIN } from "~/constants";
 import { env } from "~/env";
 import { getThirdwebChain } from "~/helpers/getThirdwebChain";
 
+import { usePlayers } from "./usePlayers";
+
 export const useBoxOwner = (
   boxesAddress: string, 
-  tokenId: number
+  tokenId: number,
+  contestId: string,
 ) => {
-  const [owner, setOwner] = useState<Address | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { data: players } = usePlayers(contestId);
+  const tokenIdsToOwners = players?.tokenIdsToOwners;
+  const cachedOwner = tokenIdsToOwners?.[tokenId];
+  const [owner, setOwner] = useState<Address | null>(cachedOwner as Address | null);
+  const [isLoading, setIsLoading] = useState<boolean>(!cachedOwner);
 
   useEffect(() => {
+    // If we have a cached owner, no need to fetch
+    if (cachedOwner) {
+      setOwner(cachedOwner);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     const getOwner = async () => {
       const client = createThirdwebClient({
@@ -35,7 +48,7 @@ export const useBoxOwner = (
       setIsLoading(false);
     }
     void getOwner();
-  }, [boxesAddress, tokenId]);
+  }, [boxesAddress, tokenId, cachedOwner]);
 
   return { owner, isLoading };
 }

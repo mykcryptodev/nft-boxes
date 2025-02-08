@@ -62,6 +62,7 @@ export type CachedPlayersData = {
   players: string[];
   identities: CachedIdentity[];
   ownerCounts: Record<string, number>;
+  tokenIdsToOwners: Record<number, string>;
 };
 
 export async function getCachedIdentity(address: string): Promise<CachedIdentity | null> {
