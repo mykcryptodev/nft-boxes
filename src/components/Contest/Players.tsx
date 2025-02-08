@@ -6,20 +6,43 @@ import { shortenAddress } from "thirdweb/utils";
 
 import { type CachedIdentity } from "~/server/redis";
 import { type Contest } from "~/types/contest";
-import { api } from "~/utils/api";
+import { usePlayers } from "~/hooks/usePlayers";
 
 interface Props {
   contest: Contest;
 }
 
 export const Players: FC<Props> = ({ contest }) => {
-  const { data: players } = api.contest.getAllPlayersInContest.useQuery({ contestId: contest.id.toString() });
+  const { data: players, isLoading } = usePlayers(contest.id.toString());
   
   const getLinkUrl = (player: CachedIdentity) => {
     if (player.name?.endsWith(".base.eth")) {
       return `https://base.org/name/${player.name}`;
     }
     return `https://basescan.org/address/${player.address}`;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="w-full pb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+          {[...Array(6)].map((_, i) => (
+            <div 
+              key={i}
+              className="flex flex-col gap-2 rounded-lg py-2 px-4 items-center animate-pulse"
+            >
+              <div className="flex w-full justify-between gap-2">
+                <div className="w-8 h-8 rounded-full bg-white/10" />
+                <div className="flex-grow">
+                  <div className="h-6 w-3/4 bg-white/10 rounded mb-2" />
+                  <div className="h-4 w-1/2 bg-white/10 rounded" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (!players) return null;
