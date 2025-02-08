@@ -12,6 +12,7 @@ import { useAccount } from "wagmi";
 import { Portal } from "~/components/utils/Portal";
 import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
+import { usePlayers } from "~/hooks/usePlayers";
 import { type Contest } from "~/types/contest";
 import { api } from "~/utils/api";
 
@@ -26,11 +27,14 @@ type Props = {
 
 export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarSize = 6, contest }) => {
   const { address } = useAccount();
-  const { data: identity, isLoading } = api.identity.getOrFetchIdentity.useQuery({
+  const { data: players } = usePlayers(contest.id.toString());
+  const cachedIdentity = players?.identities.find((player) => player.address && owner && isAddressEqual(player.address, owner));
+  const { data: fetchedIdentity, isLoading } = api.identity.getOrFetchIdentity.useQuery({
     address: owner ?? ''
   }, {
-    enabled: !!owner,
+    enabled: !!owner && !cachedIdentity,
   });
+  const identity = fetchedIdentity ?? cachedIdentity;
   const [isError, setIsError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isOwnBox = useMemo(() => address && owner && isAddressEqual(address, owner), [address, owner]);
