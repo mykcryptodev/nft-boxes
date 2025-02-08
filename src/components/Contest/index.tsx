@@ -8,6 +8,8 @@ import { api } from "~/utils/api";
 
 import { Grid } from "./Grid";
 import { Header } from "./Header";
+import { Players } from "./Players";
+import { Skeleton } from "./Skeleton";
 import { Winners } from "./Winners";
 
 type GameProps = {
@@ -15,9 +17,9 @@ type GameProps = {
 };
 
 const Contest: FC<GameProps> = ({ contestId }) => {
-  const { data: contest, refetch } = useContest(contestId);
-  const { data: scoresOnchain } = useScoresOnchain(contest);
-  const { data: game } = api.game.get.useQuery({
+  const { data: contest, refetch, isLoading: isContestLoading } = useContest(contestId);
+  const { data: scoresOnchain, isLoading: isScoresOnchainLoading } = useScoresOnchain(contest);
+  const { data: game, isLoading: isGameLoading } = api.game.get.useQuery({
     id: Number(contest?.gameId),
   }, {
     enabled: contest?.gameId !== undefined,
@@ -27,9 +29,16 @@ const Contest: FC<GameProps> = ({ contestId }) => {
   });
   const [selectedBoxIds, setSelectedBoxIds] = useState<number[]>([]);
 
-  const tabs = [ "Grid", "My Boxes", "Winners"] as const;
+  const tabs = [ "Grid", "My Boxes", "Winners", "Players"] as const;
   const [activeTab, setActiveTab] = useState<string>(tabs[0]);
   const [swapIsOpen, setSwapIsOpen] = useState<boolean>(false);
+
+  const isLoading = isContestLoading || isScoresOnchainLoading || isGameLoading;
+  if (isLoading) {
+    return (
+      <Skeleton />
+    );
+  }
 
   if (!game || !contest || !scoresOnchain) {
     return null;
@@ -46,7 +55,7 @@ const Contest: FC<GameProps> = ({ contestId }) => {
       {!swapIsOpen && (
         <>
           <Scoreboard game={game} scoresOnchain={scoresOnchain} />
-          <div role="tablist" className={`tabs tabs-boxed my-4 mx-auto max-w-xs ${activeTab === "Swap" ? "hidden" : ""}`}>
+          <div role="tablist" className={`tabs tabs-boxed my-4 mx-auto max-w-lg ${activeTab === "Swap" ? "hidden" : ""}`}>
             {tabs.map((tab) => (
               <a 
                 key={tab} 
@@ -76,6 +85,9 @@ const Contest: FC<GameProps> = ({ contestId }) => {
           contest={contest} 
           scoresOnchain={scoresOnchain} 
         />
+      </div>
+      <div className={`${activeTab === "Players" && !swapIsOpen ? "block" : "hidden"}`}>
+        <Players contest={contest} />
       </div>
       <RequestIdentity contest={contest} />
     </div>
