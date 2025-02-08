@@ -49,7 +49,7 @@ export const Winners: FC<Props> = ({ contest, scoresOnchain }) => {
   }
 
   const Winner: FC<{ tokenId: number, rewards: string, quarterIndex: number }> = ({ tokenId, rewards, quarterIndex }) => {
-    const { owner } = useBoxOwner(contest.boxesAddress, tokenId);
+    const { owner } = useBoxOwner(contest.boxesAddress, tokenId, contest.id.toString());
 
     return (
       <div className="flex items-center justify-center">
