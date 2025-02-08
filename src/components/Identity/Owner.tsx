@@ -27,12 +27,12 @@ type Props = {
 
 export const Owner: FC<Props> = ({ owner, boxId, boxesAddress, showName, avatarSize = 6, contest }) => {
   const { address } = useAccount();
-  const { data: players, isLoading: isPlayersLoading } = usePlayers(contest.id.toString());
+  const { data: players } = usePlayers(contest.id.toString());
   const cachedIdentity = players?.identities.find((player) => player.address && owner && isAddressEqual(player.address, owner));
   const { data: fetchedIdentity, isLoading } = api.identity.getOrFetchIdentity.useQuery({
     address: owner ?? ''
   }, {
-    enabled: !!owner && !cachedIdentity && !isPlayersLoading,
+    enabled: !!owner && !cachedIdentity,
   });
   const identity = fetchedIdentity ?? cachedIdentity;
   const [isError, setIsError] = useState(false);
