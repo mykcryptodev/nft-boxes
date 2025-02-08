@@ -17,9 +17,11 @@ const redis = new Redis({
 // Helper functions for identity caching
 const IDENTITY_CACHE_PREFIX = 'identity:';
 const CONTEST_CACHE_PREFIX = 'contest:';
+const CONTEST_PLAYERS_CACHE_PREFIX = 'contest:players:';
 const CACHE_TTL = 300; // 5 minutes in seconds
 
 export type CachedIdentity = {
+  address: Address | null;
   name: string | null;
   image: string | null;
   bio: string | null;
@@ -54,6 +56,12 @@ export type CachedContest = {
   q2Paid: boolean;
   q3Paid: boolean;
   finalPaid: boolean;
+};
+
+export type CachedPlayersData = {
+  players: string[];
+  identities: CachedIdentity[];
+  ownerCounts: Record<string, number>;
 };
 
 export async function getCachedIdentity(address: string): Promise<CachedIdentity | null> {
@@ -109,7 +117,29 @@ export async function setCachedContest(contestId: string, contestData: CachedCon
 export async function invalidateContestCache(contestId: string): Promise<void> {
   try {
     await redis.del(`${CONTEST_CACHE_PREFIX}${contestId}`);
+    await redis.del(`${CONTEST_PLAYERS_CACHE_PREFIX}${contestId}`);
   } catch (err) {
     console.error('Upstash Redis Delete Error:', err instanceof Error ? err.message : String(err));
   }
 } 
+
+export async function setCachedPlayersInContest(contestId: string, data: CachedPlayersData): Promise<void> {
+  try {
+    await redis.set(`${CONTEST_PLAYERS_CACHE_PREFIX}${contestId}`, data, {
+      ex: CACHE_TTL,
+    });
+  } catch (err) {
+    console.error('Upstash Redis Set Error:', err instanceof Error ? err.message : String(err));
+  }
+}
+
+export async function getCachedPlayersInContest(contestId: string): Promise<CachedPlayersData | null> {
+  try {
+    const cachedData = await redis.get<CachedPlayersData>(`${CONTEST_PLAYERS_CACHE_PREFIX}${contestId}`);
+    if (!cachedData) return null;
+    return cachedData;
+  } catch (err) {
+    console.error('Upstash Redis Get Error:', err instanceof Error ? err.message : String(err));
+    return null;
+  }
+}

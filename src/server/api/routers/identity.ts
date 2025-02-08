@@ -38,6 +38,7 @@ export const identityRouter = createTRPCRouter({
       // If the user has an address, update the cache with the new identity
       if (user.address) {
         const identityData = {
+          address: user.address,
           name: user.name,
           image: user.image,
           bio: user.bio,
@@ -71,6 +72,7 @@ export const identityRouter = createTRPCRouter({
       const existingIdentity = await ctx.db.user.findUnique({
         where: { address: input.address },
         select: {
+          address: true,
           name: true,
           image: true,
           bio: true,
@@ -129,6 +131,7 @@ export const identityRouter = createTRPCRouter({
               bio,
             },
             select: {
+              address: true,
               name: true,
               image: true,
               bio: true,

@@ -1,5 +1,5 @@
-import { type GetServerSideProps } from 'next'
 import { type IncomingMessage } from 'http';
+import { type GetServerSideProps } from 'next'
 
 import Contest from '~/components/Contest';
 import { APP_URL } from '~/constants'
