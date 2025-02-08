@@ -8,7 +8,6 @@ import { DEFAULT_CHAIN } from "~/constants";
 import { CONTEST_CONTRACT } from "~/constants/addresses";
 import { useBoxIsWinner } from "~/hooks/useBoxIsWinner";
 import { useBoxOwner } from "~/hooks/useBoxOwner";
-import { CachedIdentity } from "~/server/redis";
 import { type Contest,type ScoresOnChain } from "~/types/contest";
 import { type Game } from "~/types/game";
 
@@ -28,7 +27,7 @@ type Props = {
 
 export const Box: FC<Props> = ({ boxesAddress, boxId, onBoxSelected, onBoxUnselected, onlyMyBoxes, selectedBoxIds, contest, game, row, col, scoresOnchain }) => {
   const { address } = useAccount();
-  const { owner, isLoading: isOwnerLoading } = useBoxOwner(boxesAddress, boxId);
+  const { owner, isLoading: isOwnerLoading } = useBoxOwner(boxesAddress, boxId, contest.id.toString());
   const { hasWon } = useBoxIsWinner({
     col,
     row,
